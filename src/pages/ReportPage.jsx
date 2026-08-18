@@ -8,16 +8,17 @@ import { LocationPicker } from '../components/complaint/LocationPicker';
 import { AIAnalysisCard } from '../components/complaint/AIAnalysisCard';
 import { ComplaintReview } from '../components/complaint/ComplaintReview';
 import { PrioritySignal } from '../components/complaint/PrioritySignal';
+import { NLPAnalysisBadge } from '../components/complaint/NLPAnalysisBadge';
 import { Button } from '../components/ui/Button';
 import { analyzeComplaint, submitComplaint } from '../services/complaintService';
 
 export const ReportPage = () => {
   const navigate = useNavigate();
 
-  // Guided flow steps: 'form' | 'ai_analysis' | 'review' | 'success' | 'error'
+  // Guided steps: 'form' | 'ai_analysis' | 'review' | 'success' | 'error'
   const [step, setStep] = useState('form');
 
-  // Citizen Form State
+  // Form state
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -27,15 +28,12 @@ export const ReportPage = () => {
     hasPhotoMismatch: false
   });
 
-  // AI & Review State
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiResult, setAiResult] = useState(null);
   const [confirmedAiData, setConfirmedAiData] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedComplaint, setSubmittedComplaint] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
-
-  // Validation
   const [errors, setErrors] = useState({});
 
   const validateForm = () => {
@@ -119,23 +117,23 @@ export const ReportPage = () => {
     <div className="max-w-xl mx-auto space-y-6">
       {/* Header */}
       <div className="space-y-1">
-        <span className="text-xs font-mono font-medium text-gray-500 uppercase tracking-wider block">
-          REPORT AN ISSUE
+        <span className="text-xs font-mono font-bold text-[#C49A45] uppercase tracking-wider block">
+          OFFICIAL CITIZEN REPORT FORM
         </span>
         <h1 className="text-3xl font-bold font-heading text-[#14213D]">What's happening?</h1>
-        <p className="text-base text-gray-700 font-sans leading-relaxed">
-          Tell us what you noticed. We'll help identify the issue and route it to the right department.
+        <p className="text-sm text-gray-700 font-sans leading-relaxed">
+          Tell us what you noticed. Our AI Vision & NLP models will classify the issue and dispatch it to the municipal engineer.
         </p>
       </div>
 
       {/* STEP 1: FORM INPUT */}
       {step === 'form' && (
-        <form onSubmit={handleStartAnalysis} className="space-y-6">
+        <form onSubmit={handleStartAnalysis} className="space-y-6 font-sans">
           <div className="rounded-lg border border-[#DDE1E7] bg-white p-6 shadow-sm space-y-6">
             {/* Title Input */}
             <Input
               label="ISSUE TITLE"
-              placeholder="e.g. Pothole near Main Gate"
+              placeholder="e.g. Severe pothole near Main Market Gate"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               error={errors.title}
@@ -144,12 +142,15 @@ export const ReportPage = () => {
             {/* Description Textarea */}
             <Textarea
               label="DESCRIPTION"
-              placeholder="Example: There's a large pothole near the main gate and vehicles are having difficulty passing."
+              placeholder="Example: There's a large pothole near the main gate causing vehicle swerving and commuter safety hazards."
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               maxLength={500}
               error={errors.description}
             />
+
+            {/* Real-time NLP Entity Badge */}
+            <NLPAnalysisBadge title={formData.title} description={formData.description} />
 
             {/* Photo Uploader */}
             <ImageUploader
@@ -167,8 +168,8 @@ export const ReportPage = () => {
             />
           </div>
 
-          <Button type="submit" variant="primary" size="lg" className="w-full">
-            Analyze complaint
+          <Button type="submit" variant="primary" size="lg" className="w-full font-bold bg-[#14213D]">
+            Analyze Complaint with AI
           </Button>
         </form>
       )}
@@ -246,7 +247,6 @@ export const ReportPage = () => {
             </div>
           </div>
 
-          {/* Details Card */}
           <div className="p-4 rounded-lg bg-[#F4F5F7] border border-[#DDE1E7] space-y-3 text-left">
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold font-heading text-[#14213D]">
@@ -275,7 +275,6 @@ export const ReportPage = () => {
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <Button
               variant="primary"
@@ -317,16 +316,10 @@ export const ReportPage = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Button
-              variant="primary"
-              onClick={() => setStep('review')}
-            >
+            <Button variant="primary" onClick={() => setStep('review')}>
               Try again
             </Button>
-            <Button
-              variant="secondary"
-              onClick={() => setStep('form')}
-            >
+            <Button variant="secondary" onClick={() => setStep('form')}>
               Go back
             </Button>
           </div>
