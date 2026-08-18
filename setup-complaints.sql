@@ -1,6 +1,8 @@
 -- Run this in your Supabase SQL Editor to create the complaints table
 
-CREATE TABLE IF NOT EXISTS complaints (
+DROP TABLE IF EXISTS complaints;
+
+CREATE TABLE complaints (
   id text PRIMARY KEY,
   title text NOT NULL,
   description text NOT NULL,
