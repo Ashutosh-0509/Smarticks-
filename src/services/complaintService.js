@@ -1,24 +1,5 @@
-import { MOCK_DEPARTMENTS, MOCK_CATEGORIES } from '../data/mockComplaints';
-
-const STORAGE_KEY = 'civic_complaints_db';
-
-const getStoredComplaints = () => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch (err) {
-    console.error('Error reading localStorage', err);
-    return [];
-  }
-};
-
-const saveComplaints = (complaints) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(complaints));
-  } catch (err) {
-    console.error('Error writing localStorage', err);
-  }
-};
+import { MOCK_DEPARTMENTS } from '../data/mockComplaints';
+import { supabase } from '../lib/supabase';
 
 const delay = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -26,9 +7,31 @@ const delay = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms));
  * Fetch complaints with optional filtering
  */
 export async function getComplaints(filters = {}) {
-  await delay(250);
-  let result = getStoredComplaints();
+  let query = supabase.from('complaints').select('*').order('created_at', { ascending: false });
 
+  if (filters.status && filters.status !== 'all') {
+    query = query.eq('status', filters.status);
+  }
+
+  if (filters.priority && filters.priority !== 'all') {
+    query = query.eq('priority', filters.priority);
+  }
+
+  if (filters.department_id && filters.department_id !== 'all') {
+    query = query.eq('department_id', filters.department_id);
+  }
+
+  if (filters.needsReviewOnly) {
+    query = query.gte('evidence_score', 30).lt('evidence_score', 70);
+  }
+
+  const { data, error } = await query;
+  if (error) {
+    console.error("Error fetching complaints:", error);
+    return [];
+  }
+
+  let result = data;
   if (filters.search) {
     const q = filters.search.toLowerCase();
     result = result.filter(
@@ -40,22 +43,6 @@ export async function getComplaints(filters = {}) {
     );
   }
 
-  if (filters.status && filters.status !== 'all') {
-    result = result.filter((c) => c.status === filters.status);
-  }
-
-  if (filters.priority && filters.priority !== 'all') {
-    result = result.filter((c) => c.priority === filters.priority);
-  }
-
-  if (filters.department_id && filters.department_id !== 'all') {
-    result = result.filter((c) => c.department_id === filters.department_id);
-  }
-
-  if (filters.needsReviewOnly) {
-    result = result.filter((c) => c.evidence_score >= 30 && c.evidence_score < 70);
-  }
-
   return result;
 }
 
@@ -63,21 +50,24 @@ export async function getComplaints(filters = {}) {
  * Get single complaint by ID
  */
 export async function getComplaintById(id) {
-  await delay(200);
-  const db = getStoredComplaints();
-  const found = db.find((c) => c.id.toUpperCase() === id.toUpperCase());
-  if (!found) {
+  const { data, error } = await supabase
+    .from('complaints')
+    .select('*')
+    .eq('id', id.toUpperCase())
+    .single();
+
+  if (error || !data) {
     throw new Error(`Complaint with ID ${id} not found.`);
   }
-  return { ...found };
+  return data;
 }
 
 /**
- * AI Analysis Service Mock
+ * AI Analysis Service
  */
 export async function analyzeComplaint(formData) {
   try {
-    const response = await fetch('http://localhost:3001/api/analyze', {
+    const response = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -182,13 +172,15 @@ export async function analyzeComplaint(formData) {
 }
 
 /**
- * Submit new complaint & save to localStorage database
+ * Submit new complaint & save to Supabase
  */
 export async function submitComplaint(complaintData) {
-  await delay(500);
-
-  const db = getStoredComplaints();
-  const nextIdNum = 1048 + db.length;
+  // Get count for ID generation
+  const { count, error: countError } = await supabase
+    .from('complaints')
+    .select('*', { count: 'exact', head: true });
+    
+  const nextIdNum = 1048 + (count || 0);
   const newId = `CR-${nextIdNum}`;
   const now = new Date().toISOString();
 
@@ -236,23 +228,28 @@ export async function submitComplaint(complaintData) {
     ]
   };
 
-  db.unshift(newComplaint);
-  saveComplaints(db);
-  return newComplaint;
+  const { data, error } = await supabase.from('complaints').insert([newComplaint]).select().single();
+  if (error) {
+    console.error("Insert error:", error);
+    throw new Error('Failed to submit complaint to database');
+  }
+
+  return data;
 }
 
 /**
  * Staff status update
  */
 export async function updateComplaintStatus(id, newStatus) {
-  await delay(350);
-  const db = getStoredComplaints();
-  const complaint = db.find((c) => c.id === id);
-  if (!complaint) throw new Error('Complaint not found');
+  const { data: complaint, error: fetchError } = await supabase
+    .from('complaints')
+    .select('*')
+    .eq('id', id)
+    .single();
 
-  complaint.status = newStatus;
-  complaint.updated_at = new Date().toISOString();
+  if (fetchError || !complaint) throw new Error('Complaint not found');
 
+  const now = new Date().toISOString();
   const formattedDate = new Date().toLocaleDateString('en-GB', {
     day: '2-digit',
     month: 'short'
@@ -263,27 +260,43 @@ export async function updateComplaintStatus(id, newStatus) {
     hour12: true
   });
 
-  const existingStep = complaint.timeline.find((t) => t.status === newStatus);
+  const timeline = [...complaint.timeline];
+  const existingStep = timeline.find((t) => t.status === newStatus);
   if (!existingStep) {
-    complaint.timeline.push({
+    timeline.push({
       status: newStatus,
       timestamp: `${formattedDate} · ${formattedTime}`,
       note: `Status updated to ${newStatus} by municipal authority.`
     });
   }
 
-  saveComplaints(db);
-  return { ...complaint };
+  const { data: updatedComplaint, error: updateError } = await supabase
+    .from('complaints')
+    .update({ 
+      status: newStatus, 
+      updated_at: now,
+      timeline 
+    })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (updateError) throw new Error('Failed to update complaint');
+
+  return updatedComplaint;
 }
 
 /**
  * Send Citizen Follow-up
  */
 export async function sendFollowUp(id, message) {
-  await delay(400);
-  const db = getStoredComplaints();
-  const complaint = db.find((c) => c.id === id);
-  if (!complaint) throw new Error('Complaint not found');
+  const { data: complaint, error: fetchError } = await supabase
+    .from('complaints')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (fetchError || !complaint) throw new Error('Complaint not found');
 
   const formattedDate = new Date().toLocaleDateString('en-GB', {
     day: '2-digit',
@@ -295,14 +308,23 @@ export async function sendFollowUp(id, message) {
     hour12: true
   });
 
-  complaint.timeline.push({
+  const timeline = [...complaint.timeline];
+  timeline.push({
     status: complaint.status,
     timestamp: `${formattedDate} · ${formattedTime}`,
     note: `Citizen Follow-up sent: "${message}"`
   });
 
-  saveComplaints(db);
-  return { ...complaint };
+  const { data: updatedComplaint, error: updateError } = await supabase
+    .from('complaints')
+    .update({ timeline })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (updateError) throw new Error('Failed to send follow up');
+
+  return updatedComplaint;
 }
 
 /**

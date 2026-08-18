@@ -21,17 +21,6 @@ export const GovHeader = () => {
 
         {/* Right Language & Social Icons & Role Badge */}
         <div className="flex items-center gap-6 text-[11px]">
-          {/* Social Links */}
-          <div className="hidden md:flex items-center gap-3 text-gray-400">
-            <span className="text-gray-400 font-sans">Follow on:</span>
-            <a href="#" className="hover:text-white transition-colors" title="Facebook"><Facebook className="w-3.5 h-3.5" /></a>
-            <a href="#" className="hover:text-white transition-colors" title="Twitter"><Twitter className="w-3.5 h-3.5" /></a>
-            <a href="#" className="hover:text-white transition-colors" title="Vimeo"><Video className="w-3.5 h-3.5" /></a>
-            <a href="#" className="hover:text-white transition-colors" title="Instagram"><Instagram className="w-3.5 h-3.5" /></a>
-          </div>
-
-          <span className="text-gray-700">|</span>
-
           {/* Auth / Role Badge */}
           {user ? (
             <div className="flex items-center gap-2">

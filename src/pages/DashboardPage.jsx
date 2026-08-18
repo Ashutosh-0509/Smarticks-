@@ -90,11 +90,6 @@ export const DashboardPage = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-mono px-3 py-1 bg-[#14213D] text-white rounded font-bold border border-[#C49A45]">
-            MUNICIPAL OFFICER MODE ACTIVE
-          </span>
-        </div>
       </div>
 
       {/* KPI Stats Bar */}

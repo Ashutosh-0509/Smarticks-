@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(true);
     setAuthError('');
     try {
-      const res = await fetch('http://localhost:3001/api/auth/send-code', {
+      const res = await fetch('/api/auth/send-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: inputEmail })
@@ -87,7 +87,7 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(true);
     setAuthError('');
     try {
-      const res = await fetch('http://localhost:3001/api/auth/verify-code', {
+      const res = await fetch('/api/auth/verify-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, code: inputOtp, requested_role: requestedRole })
