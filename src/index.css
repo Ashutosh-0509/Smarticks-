@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #14213D;
+  --color-surface: #F4F5F7;
+  --color-surface-card: #FFFFFF;
+  --color-accent: #E8963C;
+  --color-[#C49A45]: #C49A45;
+  --color-priority-high: #D64545;
+  --color-priority-medium: #E8963C;
+  --color-priority-low: #4A9B6E;
+  --color-border-subtle: #DDE1E7;
+
+  --font-heading: "Space Grotesk", sans-serif;
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
+
+:root {
+  --ink: #14213D;
+  --surface: #F4F5F7;
+  --surface-card: #FFFFFF;
+  --gold: #C49A45;
+  --gold-hover: #a88235;
+  --priority-high: #D64545;
+  --priority-medium: #E8963C;
+  --priority-low: #4A9B6E;
+  --border-color: #DDE1E7;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  background-color: var(--surface);
+  color: var(--ink);
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1, h2, h3, h4, .font-heading {
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.font-mono {
+  font-family: "IBM Plex Mono", monospace;
+}
+
+/* Custom focus ring styling */
+*:focus-visible {
+  outline: 2px solid #C49A45 !important;
+  outline-offset: 2px !important;
+}
+
+/* Custom Leaflet Map Styling Override */
+.leaflet-container {
+  font-family: "Inter", sans-serif !important;
+  z-index: 1;
+}
+
+.leaflet-popup-content-wrapper {
+  background-color: #FFFFFF !important;
+  border-radius: 8px !important;
+  border: 1px solid #DDE1E7 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  padding: 4px !important;
+}
+
+.leaflet-popup-tip {
+  background-color: #FFFFFF !important;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
