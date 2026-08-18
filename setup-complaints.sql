@@ -1,6 +1,7 @@
 -- Run this in your Supabase SQL Editor to create the complaints table
 
-DROP TABLE IF EXISTS complaints;
+DROP TABLE IF EXISTS complaints CASCADE;
+DROP TABLE IF EXISTS complaint_updates CASCADE;
 
 CREATE TABLE complaints (
   id text PRIMARY KEY,
