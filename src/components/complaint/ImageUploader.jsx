@@ -59,9 +59,7 @@ export const ImageUploader = ({ value, onChange, error }) => {
       <div className="flex items-center justify-between">
         <label className={`text-sm font-medium ${error ? 'text-[#D64545]' : 'text-[#14213D]'} font-sans flex items-center gap-1.5`}>
           <span>PHOTO EVIDENCE</span>
-          <span className="text-[10px] font-mono bg-[#14213D] text-white px-1.5 py-0.5 rounded font-bold">
-            AI VISION SCAN ACTIVE
-          </span>
+
         </label>
       </div>
       {error && <p className="text-xs text-[#D64545] font-medium mt-[-4px]">{error}</p>}
@@ -73,23 +71,12 @@ export const ImageUploader = ({ value, onChange, error }) => {
             <div className="relative w-full sm:w-56 h-40 rounded-md overflow-hidden bg-gray-900 border border-[#DDE1E7] flex-shrink-0 group">
               <img src={value} alt="Complaint Evidence Preview" className="w-full h-full object-cover opacity-90" />
 
-              {/* Simulated AI Computer Vision Bounding Box */}
-              <div className="absolute inset-4 border-2 border-[#C49A45] rounded border-dashed flex items-start justify-start p-1.5 animate-pulse bg-[#C49A45]/10">
-                <span className="text-[9px] font-mono font-bold bg-[#C49A45] text-white px-1 py-0.5 rounded shadow">
-                  DETECTED: HAZARD REGION (94.2%)
-                </span>
-              </div>
+
             </div>
 
             {/* AI Detection Breakdown */}
             <div className="flex-1 w-full space-y-2 text-xs">
-              <div className="flex items-center justify-between border-b border-[#DDE1E7] pb-1.5">
-                <span className="font-mono font-bold text-[#4A9B6E] flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#4A9B6E]" />
-                  AI Vision Scan Verified
-                </span>
-                <span className="font-mono text-gray-500">Confidence: 94.2%</span>
-              </div>
+
 
               <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
                 <div className="p-2 bg-[#F4F5F7] rounded border border-[#DDE1E7]">
