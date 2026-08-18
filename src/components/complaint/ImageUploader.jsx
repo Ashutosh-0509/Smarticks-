@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Camera, Upload, Image as ImageIcon, Trash2, RefreshCw, Eye, Sparkles, CheckCircle2 } from 'lucide-react';
 import { uploadComplaintImage } from '../../services/complaintService';
 
-export const ImageUploader = ({ value, onChange }) => {
+export const ImageUploader = ({ value, onChange, error }) => {
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -57,13 +57,14 @@ export const ImageUploader = ({ value, onChange }) => {
   return (
     <div className="w-full flex flex-col gap-2 font-sans">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-[#14213D] font-sans flex items-center gap-1.5">
+        <label className={`text-sm font-medium ${error ? 'text-[#D64545]' : 'text-[#14213D]'} font-sans flex items-center gap-1.5`}>
           <span>PHOTO EVIDENCE</span>
           <span className="text-[10px] font-mono bg-[#14213D] text-white px-1.5 py-0.5 rounded font-bold">
             AI VISION SCAN ACTIVE
           </span>
         </label>
       </div>
+      {error && <p className="text-xs text-[#D64545] font-medium mt-[-4px]">{error}</p>}
 
       {value ? (
         <div className="relative rounded-lg border-2 border-[#C49A45] overflow-hidden bg-white p-3 space-y-3 shadow-md">

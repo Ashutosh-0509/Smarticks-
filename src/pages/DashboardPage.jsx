@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { getComplaints, updateComplaintStatus } from '../services/complaintService';
 import { StatsCards } from '../components/dashboard/StatsCards';
 import { FilterBar } from '../components/dashboard/FilterBar';
@@ -10,6 +12,17 @@ import { LoadingState } from '../components/ui/LoadingState';
 import { ShieldCheck, Radio } from 'lucide-react';
 
 export const DashboardPage = () => {
+  const { user, openAuthModal } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/');
+      openAuthModal();
+    } else if (user.role !== 'staff') {
+      navigate('/');
+    }
+  }, [user, navigate, openAuthModal]);
   const [complaints, setComplaints] = useState([]);
   const [allComplaints, setAllComplaints] = useState([]);
   const [loading, setLoading] = useState(true);

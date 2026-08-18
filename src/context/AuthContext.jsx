@@ -1,40 +1,47 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { jwtDecode } from 'jwt-decode';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  // Load saved session if present in localStorage
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('civic_user');
-    return saved ? JSON.parse(saved) : null;
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        // Ensure token hasn't expired
+        if (decoded.exp * 1000 < Date.now()) {
+          localStorage.removeItem('auth_token');
+          return null;
+        }
+        return decoded;
+      } catch (e) {
+        localStorage.removeItem('auth_token');
+        return null;
+      }
+    }
+    return null;
   });
 
-  // Controls whether the 2-card role selection / auth modal is active
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(() => {
-    return !localStorage.getItem('civic_user');
-  });
-
-  // Auth flow step: 'role_select' | 'citizen_phone' | 'citizen_otp' | 'admin_login'
-  const [authModalStep, setAuthModalStep] = useState('role_select');
-
-  // Input states
-  const [phone, setPhone] = useState('');
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(() => !localStorage.getItem('auth_token'));
+  const [authModalStep, setAuthModalStep] = useState('email_input'); // 'email_input' | 'otp_input'
+  const [email, setEmail] = useState('');
   const [otpCode, setOtpCode] = useState('');
-  const [adminEmail, setAdminEmail] = useState('admin@city.gov.in');
-  const [adminPassword, setAdminPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      localStorage.setItem('civic_user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('civic_user');
-    }
-  }, [user]);
+    // If the token expires or is removed elsewhere, update user
+    const handleStorageChange = () => {
+      const token = localStorage.getItem('auth_token');
+      if (!token) setUser(null);
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
-  const openAuthModal = (initialStep = 'role_select') => {
-    setAuthModalStep(initialStep);
+  const openAuthModal = () => {
+    setAuthModalStep('email_input');
     setAuthError('');
     setIsAuthModalOpen(true);
   };
@@ -44,87 +51,69 @@ export const AuthProvider = ({ children }) => {
     setAuthError('');
   };
 
-  const selectRole = (role) => {
-    setAuthError('');
-    if (role === 'citizen') {
-      setAuthModalStep('citizen_phone');
-    } else if (role === 'admin') {
-      setAuthModalStep('admin_login');
-    }
-  };
-
-  const sendCitizenOtp = async (inputPhone) => {
-    if (!inputPhone || inputPhone.length < 10) {
-      setAuthError('Please enter a valid 10-digit mobile number.');
+  const sendOtp = async (inputEmail) => {
+    if (!inputEmail || !inputEmail.includes('@')) {
+      setAuthError('Please enter a valid email address.');
       return false;
     }
     setIsLoading(true);
     setAuthError('');
-    // Simulating SMS gateway trigger
-    await new Promise((res) => setTimeout(res, 600));
-    setIsLoading(false);
-    setPhone(inputPhone);
-    setOtpCode('123456'); // Pre-fill mock OTP for easy demo
-    setAuthModalStep('citizen_otp');
-    return true;
-  };
-
-  const verifyCitizenOtp = async (inputOtp) => {
-    if (inputOtp !== '123456') {
-      setAuthError('Invalid OTP code. Use demo OTP 123456.');
+    try {
+      const res = await fetch('http://localhost:3001/api/auth/send-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: inputEmail })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send OTP');
+      
+      setEmail(inputEmail);
+      setAuthModalStep('otp_input');
+      return true;
+    } catch (err) {
+      setAuthError(err.message);
       return false;
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(true);
-    await new Promise((res) => setTimeout(res, 500));
-    setIsLoading(false);
-
-    const citizenUser = {
-      role: 'citizen',
-      name: `Citizen (${phone.slice(-4)})`,
-      phone: phone,
-      email: `citizen_${phone}@civic.gov.in`
-    };
-
-    setUser(citizenUser);
-    setIsAuthModalOpen(false);
-    setAuthError('');
-    return true;
   };
 
-  const loginAsAdmin = async (email, password) => {
-    if (!email || !password) {
-      setAuthError('Please enter municipal officer email and password.');
+  const verifyOtp = async (inputOtp) => {
+    if (!inputOtp || inputOtp.length !== 6) {
+      setAuthError('Please enter a valid 6-digit OTP code.');
       return false;
     }
     setIsLoading(true);
     setAuthError('');
-    await new Promise((res) => setTimeout(res, 600));
-    setIsLoading(false);
-
-    if (password !== 'admin123' && password !== 'admin') {
-      setAuthError('Invalid credentials. Use demo password: admin123');
+    try {
+      const res = await fetch('http://localhost:3001/api/auth/verify-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code: inputOtp })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Invalid OTP');
+      
+      localStorage.setItem('auth_token', data.token);
+      const decoded = jwtDecode(data.token);
+      setUser(decoded);
+      setIsAuthModalOpen(false);
+      
+      // We will let the router handle redirection in App.jsx or Login component
+      return decoded;
+    } catch (err) {
+      setAuthError(err.message);
       return false;
+    } finally {
+      setIsLoading(false);
     }
-
-    const adminUser = {
-      role: 'admin',
-      name: 'Officer A. Sharma',
-      email: email,
-      department: 'Central Municipal Control Room',
-      employeeId: 'MNC-8842'
-    };
-
-    setUser(adminUser);
-    setIsAuthModalOpen(false);
-    setAuthError('');
-    return true;
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('civic_user');
+    localStorage.removeItem('auth_token');
     setIsAuthModalOpen(true);
-    setAuthModalStep('role_select');
+    setAuthModalStep('email_input');
   };
 
   return (
@@ -133,22 +122,16 @@ export const AuthProvider = ({ children }) => {
         user,
         isAuthModalOpen,
         authModalStep,
-        phone,
+        email,
         otpCode,
-        adminEmail,
-        adminPassword,
         authError,
         isLoading,
-        setPhone,
+        setEmail,
         setOtpCode,
-        setAdminEmail,
-        setAdminPassword,
         openAuthModal,
         closeAuthModal,
-        selectRole,
-        sendCitizenOtp,
-        verifyCitizenOtp,
-        loginAsAdmin,
+        sendOtp,
+        verifyOtp,
         logout,
         setAuthModalStep
       }}

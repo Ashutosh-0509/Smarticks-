@@ -76,87 +76,109 @@ export async function getComplaintById(id) {
  * AI Analysis Service Mock
  */
 export async function analyzeComplaint(formData) {
-  await delay(1000);
+  try {
+    const response = await fetch('http://localhost:3001/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: formData.title,
+        description: formData.description,
+        image_url: formData.image_url
+      })
+    });
 
-  const text = `${formData.title || ''} ${formData.description || ''}`.toLowerCase();
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.statusText}`);
+    }
 
-  let category = 'Other';
-  let priority = 'Medium';
-  let deptId = 'dept-general';
-  let deptName = 'General Civic Services';
-  let aiSummary = 'Issue analyzed from citizen report.';
-  let aiReasoning = 'Categorized based on keyword matches and location safety heuristics.';
-  let confidence = 0.89;
-  let evidenceScore = 88;
-  let evidenceFlags = [];
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.warn("Gemini API call failed, falling back to local NLP logic:", error);
+    
+    // Fallback logic
+    await delay(1000);
 
-  if (text.includes('pothole') || text.includes('road') || text.includes('asphalt') || text.includes('crater')) {
-    category = 'Pothole';
-    priority = 'High';
-    deptId = 'dept-roads';
-    deptName = 'Roads & Infrastructure';
-    aiSummary = 'Road surface damage detected. May create immediate vehicle and pedestrian hazard.';
-    aiReasoning = 'High priority because unpatched road surface holes create safety hazards on active transit routes.';
-    confidence = 0.94;
-  } else if (text.includes('garbage') || text.includes('trash') || text.includes('waste') || text.includes('dump')) {
-    category = 'Garbage';
-    priority = 'Medium';
-    deptId = 'dept-sanitation';
-    deptName = 'Sanitation & Solid Waste';
-    aiSummary = 'Solid waste accumulation reported in public vicinity.';
-    aiReasoning = 'Medium priority assigned for scheduled sanitation truck dispatch.';
-    confidence = 0.91;
-  } else if (text.includes('light') || text.includes('dark') || text.includes('pole') || text.includes('lamp')) {
-    category = 'Streetlight';
-    priority = 'Medium';
-    deptId = 'dept-electrical';
-    deptName = 'Electrical & Street Lighting';
-    aiSummary = 'Illumination outage reported on public roadway.';
-    aiReasoning = 'Medium priority to maintain street safety and illumination standards.';
-    confidence = 0.92;
-  } else if (text.includes('water') || text.includes('leak') || text.includes('pipe') || text.includes('burst')) {
-    category = 'Water Leakage';
-    priority = 'High';
-    deptId = 'dept-water';
-    deptName = 'Water Supply & Sewage';
-    aiSummary = 'Pressurized pipe leakage wasting potable supply and inundating street.';
-    aiReasoning = 'High priority to minimize water loss and protect sub-base integrity.';
-    confidence = 0.96;
-  } else if (text.includes('drain') || text.includes('sewer') || text.includes('clog') || text.includes('waterlog')) {
-    category = 'Drainage';
-    priority = 'High';
-    deptId = 'dept-drainage';
-    deptName = 'Storm Water Drainage';
-    aiSummary = 'Storm drain channel obstruction preventing runoff flow.';
-    aiReasoning = 'High priority assigned due to urban waterlogging and overflow risk.';
-    confidence = 0.93;
-  } else if (text.includes('wire') || text.includes('shock') || text.includes('cable') || text.includes('spark')) {
-    category = 'Electricity';
-    priority = 'High';
-    deptId = 'dept-electrical';
-    deptName = 'Electrical & Street Lighting';
-    aiSummary = 'Potentially dangerous electrical exposure reported.';
-    aiReasoning = 'High priority for urgent public safety hazard mitigation.';
-    confidence = 0.95;
+    const text = `${formData.title || ''} ${formData.description || ''}`.toLowerCase();
+
+    let category = 'Other';
+    let priority = 'Medium';
+    let deptId = 'dept-general';
+    let deptName = 'General Civic Services';
+    let aiSummary = 'Issue analyzed from citizen report.';
+    let aiReasoning = 'Categorized based on keyword matches and location safety heuristics.';
+    let confidence = 0.89;
+    let evidenceScore = 88;
+    let evidenceFlags = [];
+
+    if (text.includes('pothole') || text.includes('road') || text.includes('asphalt') || text.includes('crater')) {
+      category = 'Pothole';
+      priority = 'High';
+      deptId = 'dept-roads';
+      deptName = 'Roads & Infrastructure';
+      aiSummary = 'Road surface damage detected. May create immediate vehicle and pedestrian hazard.';
+      aiReasoning = 'High priority because unpatched road surface holes create safety hazards on active transit routes.';
+      confidence = 0.94;
+    } else if (text.includes('garbage') || text.includes('trash') || text.includes('waste') || text.includes('dump')) {
+      category = 'Garbage';
+      priority = 'Medium';
+      deptId = 'dept-sanitation';
+      deptName = 'Sanitation & Solid Waste';
+      aiSummary = 'Solid waste accumulation reported in public vicinity.';
+      aiReasoning = 'Medium priority assigned for scheduled sanitation truck dispatch.';
+      confidence = 0.91;
+    } else if (text.includes('light') || text.includes('dark') || text.includes('pole') || text.includes('lamp')) {
+      category = 'Streetlight';
+      priority = 'Medium';
+      deptId = 'dept-electrical';
+      deptName = 'Electrical & Street Lighting';
+      aiSummary = 'Illumination outage reported on public roadway.';
+      aiReasoning = 'Medium priority to maintain street safety and illumination standards.';
+      confidence = 0.92;
+    } else if (text.includes('water') || text.includes('leak') || text.includes('pipe') || text.includes('burst')) {
+      category = 'Water Leakage';
+      priority = 'High';
+      deptId = 'dept-water';
+      deptName = 'Water Supply & Sewage';
+      aiSummary = 'Pressurized pipe leakage wasting potable supply and inundating street.';
+      aiReasoning = 'High priority to minimize water loss and protect sub-base integrity.';
+      confidence = 0.96;
+    } else if (text.includes('drain') || text.includes('sewer') || text.includes('clog') || text.includes('waterlog')) {
+      category = 'Drainage';
+      priority = 'High';
+      deptId = 'dept-drainage';
+      deptName = 'Storm Water Drainage';
+      aiSummary = 'Storm drain channel obstruction preventing runoff flow.';
+      aiReasoning = 'High priority assigned due to urban waterlogging and overflow risk.';
+      confidence = 0.93;
+    } else if (text.includes('wire') || text.includes('shock') || text.includes('cable') || text.includes('spark')) {
+      category = 'Electricity';
+      priority = 'High';
+      deptId = 'dept-electrical';
+      deptName = 'Electrical & Street Lighting';
+      aiSummary = 'Potentially dangerous electrical exposure reported.';
+      aiReasoning = 'High priority for urgent public safety hazard mitigation.';
+      confidence = 0.95;
+    }
+
+    if (formData.hasPhotoMismatch) {
+      evidenceScore = 28;
+      evidenceFlags = ['Image content could not be matched to description text'];
+    }
+
+    return {
+      category,
+      priority,
+      department_id: deptId,
+      department_name: deptName,
+      ai_summary: aiSummary,
+      ai_reasoning: aiReasoning,
+      ai_confidence: confidence,
+      evidence_score: evidenceScore,
+      evidence_flags: evidenceFlags,
+      is_duplicate: false
+    };
   }
-
-  if (formData.hasPhotoMismatch) {
-    evidenceScore = 28;
-    evidenceFlags = ['Image content could not be matched to description text'];
-  }
-
-  return {
-    category,
-    priority,
-    department_id: deptId,
-    department_name: deptName,
-    ai_summary: aiSummary,
-    ai_reasoning: aiReasoning,
-    ai_confidence: confidence,
-    evidence_score: evidenceScore,
-    evidence_flags: evidenceFlags,
-    is_duplicate: false
-  };
 }
 
 /**
@@ -289,7 +311,12 @@ export async function sendFollowUp(id, message) {
 export async function uploadComplaintImage(file) {
   await delay(300);
   if (file && typeof file !== 'string') {
-    return URL.createObjectURL(file);
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   }
   return 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&q=80&w=800';
 }

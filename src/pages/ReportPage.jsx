@@ -5,10 +5,9 @@ import { Input } from '../components/ui/Input';
 import { Textarea } from '../components/ui/Textarea';
 import { ImageUploader } from '../components/complaint/ImageUploader';
 import { LocationPicker } from '../components/complaint/LocationPicker';
+import { VoiceInput } from '../components/complaint/VoiceInput';
 import { AIAnalysisCard } from '../components/complaint/AIAnalysisCard';
 import { ComplaintReview } from '../components/complaint/ComplaintReview';
-import { PrioritySignal } from '../components/complaint/PrioritySignal';
-import { NLPAnalysisBadge } from '../components/complaint/NLPAnalysisBadge';
 import { Button } from '../components/ui/Button';
 import { analyzeComplaint, submitComplaint } from '../services/complaintService';
 
@@ -23,8 +22,8 @@ export const ReportPage = () => {
     title: '',
     description: '',
     image_url: '',
-    location: 'Sector 17, Navi Mumbai',
-    coordinates: { lat: 19.0760, lng: 73.0033 },
+    location: '',
+    coordinates: null,
     hasPhotoMismatch: false
   });
 
@@ -43,6 +42,12 @@ export const ReportPage = () => {
       errs.description = 'Please describe the problem in detail.';
     } else if (formData.description.trim().length < 10) {
       errs.description = 'Description should be at least 10 characters long.';
+    }
+    if (!formData.image_url) {
+      errs.image_url = 'Please upload a photo of the issue.';
+    }
+    if (!formData.location || !formData.coordinates) {
+      errs.location = 'Please select the location of the issue.';
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -102,8 +107,8 @@ export const ReportPage = () => {
       title: '',
       description: '',
       image_url: '',
-      location: 'Sector 17, Navi Mumbai',
-      coordinates: { lat: 19.0760, lng: 73.0033 },
+      location: '',
+      coordinates: null,
       hasPhotoMismatch: false
     });
     setAiResult(null);
@@ -139,23 +144,28 @@ export const ReportPage = () => {
               error={errors.title}
             />
 
-            {/* Description Textarea */}
-            <Textarea
-              label="DESCRIPTION"
-              placeholder="Example: There's a large pothole near the main gate causing vehicle swerving and commuter safety hazards."
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              maxLength={500}
-              error={errors.description}
-            />
+            {/* Description Textarea & Voice Input */}
+            <div className="flex flex-col gap-2">
+              <Textarea
+                label="DESCRIPTION"
+                placeholder="Example: There's a large pothole near the main gate causing vehicle swerving and commuter safety hazards."
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                maxLength={500}
+                error={errors.description}
+              />
+              <VoiceInput 
+                currentValue={formData.description} 
+                onTranscript={(text) => setFormData({ ...formData, description: text })} 
+              />
+            </div>
 
-            {/* Real-time NLP Entity Badge */}
-            <NLPAnalysisBadge title={formData.title} description={formData.description} />
 
             {/* Photo Uploader */}
             <ImageUploader
               value={formData.image_url}
               onChange={(url) => setFormData({ ...formData, image_url: url })}
+              error={errors.image_url}
             />
 
             {/* Location Picker */}
@@ -165,6 +175,7 @@ export const ReportPage = () => {
               onChange={({ location, coordinates }) =>
                 setFormData({ ...formData, location, coordinates })
               }
+              error={errors.location}
             />
           </div>
 

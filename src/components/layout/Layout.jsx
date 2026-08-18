@@ -18,17 +18,17 @@ export const Layout = () => {
       {/* Auth & Role Selection Modal */}
       <AuthModal />
 
-      {/* Main Header matching CityWall Template */}
+      {/* Main Header */}
       <header className="sticky top-0 z-40 bg-white border-b border-[#DDE1E7] shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 flex items-center justify-between">
-          {/* Brand Logo matching CityWall */}
+          {/* Brand Logo */}
           <Link to="/" className="flex items-center gap-3 group focus-visible:outline-none">
             <div className="w-11 h-11 rounded-lg bg-[#F4F5F7] text-[#C49A45] flex items-center justify-center font-heading font-bold text-xl shadow-inner border border-[#DDE1E7] group-hover:border-[#C49A45] transition-colors">
               <Building2 className="w-7 h-7 text-[#C49A45]" />
             </div>
             <div>
               <span className="text-2xl font-extrabold font-heading text-[#14213D] tracking-tight leading-none">
-                CityWall
+                CivicReport
               </span>
               <span className="text-[10px] text-gray-500 font-sans block mt-0.5 tracking-wide">
                 City Government Online Services
@@ -53,63 +53,35 @@ export const Layout = () => {
               </NavLink>
             </div>
 
-            {/* Pages Dropdown */}
-            <div className="relative group">
-              <button className="flex items-center gap-1 py-2 hover:text-[#C49A45] transition-colors">
-                <span>Pages</span>
-                <ChevronDown className="w-3.5 h-3.5" />
-              </button>
-              {/* Dropdown Menu */}
-              <div className="absolute left-0 top-full hidden group-hover:block w-48 bg-white border border-[#DDE1E7] rounded-lg shadow-lg py-2 z-50">
-                <Link to="/citizen-portal" className="block px-4 py-2 text-xs hover:bg-[#F4F5F7] hover:text-[#C49A45]">
-                  Citizen Portal
-                </Link>
-                <Link to="/dashboard" className="block px-4 py-2 text-xs hover:bg-[#F4F5F7] hover:text-[#C49A45]">
-                  Authority Dashboard
-                </Link>
-                <Link to="/" className="block px-4 py-2 text-xs hover:bg-[#F4F5F7] hover:text-[#C49A45]">
-                  Live Civic Issue Map
-                </Link>
-              </div>
-            </div>
+            {/* Citizen Portal Link */}
+            <NavLink
+              to="/citizen-portal"
+              className={({ isActive }) =>
+                `flex items-center gap-1 py-2 hover:text-[#C49A45] transition-colors ${
+                  isActive ? 'text-[#C49A45] font-semibold' : ''
+                }`
+              }
+            >
+              <span>Citizen Portal</span>
+            </NavLink>
 
-            {/* Services Dropdown */}
-            <div className="relative group">
-              <Link to="/report" className="flex items-center gap-1 py-2 hover:text-[#C49A45] transition-colors">
-                <span>Services</span>
-                <ChevronDown className="w-3.5 h-3.5" />
-              </Link>
-              <div className="absolute left-0 top-full hidden group-hover:block w-52 bg-white border border-[#DDE1E7] rounded-lg shadow-lg py-2 z-50">
-                <Link to="/report" className="block px-4 py-2 text-xs hover:bg-[#F4F5F7] hover:text-[#C49A45]">
-                  Pothole & Road Repair
-                </Link>
-                <Link to="/report" className="block px-4 py-2 text-xs hover:bg-[#F4F5F7] hover:text-[#C49A45]">
-                  Sanitation & Garbage
-                </Link>
-                <Link to="/report" className="block px-4 py-2 text-xs hover:bg-[#F4F5F7] hover:text-[#C49A45]">
-                  Water Leakage & Drainage
-                </Link>
-                <Link to="/report" className="block px-4 py-2 text-xs hover:bg-[#F4F5F7] hover:text-[#C49A45]">
-                  Street Lighting & Electric
-                </Link>
-              </div>
-            </div>
 
-            {/* Teams Dropdown */}
-            <div className="relative group">
-              <Link to="/dashboard" className="flex items-center gap-1 py-2 hover:text-[#C49A45] transition-colors">
-                <span>Teams</span>
-                <ChevronDown className="w-3.5 h-3.5" />
-              </Link>
-            </div>
 
-            {/* News Dropdown */}
-            <div className="relative group">
-              <Link to="/" className="flex items-center gap-1 py-2 hover:text-[#C49A45] transition-colors">
-                <span>News</span>
-                <ChevronDown className="w-3.5 h-3.5" />
-              </Link>
-            </div>
+            {/* Authority Dashboard Link */}
+            {user?.role === 'admin' && (
+              <NavLink
+                to="/dashboard"
+                className={({ isActive }) =>
+                  `flex items-center gap-1 py-2 hover:text-[#C49A45] transition-colors ${
+                    isActive ? 'text-[#C49A45] font-semibold' : ''
+                  }`
+                }
+              >
+                <span>Authority Dashboard</span>
+              </NavLink>
+            )}
+
+
 
             {/* Contact */}
             <Link to="/track/CR-1048" className="hover:text-[#C49A45] transition-colors">
@@ -161,19 +133,21 @@ export const Layout = () => {
           <UserCheck className="w-5 h-5 mb-0.5" />
           <span>Citizen</span>
         </NavLink>
-        <NavLink to="/dashboard" className="flex flex-col items-center justify-center py-1 px-3 rounded-lg text-xs font-medium text-gray-700 hover:text-[#C49A45]">
-          <LayoutDashboard className="w-5 h-5 mb-0.5" />
-          <span>Admin</span>
-        </NavLink>
+        {user?.role === 'admin' && (
+          <NavLink to="/dashboard" className="flex flex-col items-center justify-center py-1 px-3 rounded-lg text-xs font-medium text-gray-700 hover:text-[#C49A45]">
+            <LayoutDashboard className="w-5 h-5 mb-0.5" />
+            <span>Admin</span>
+          </NavLink>
+        )}
       </nav>
 
-      {/* Official Footer matching CityWall */}
+      {/* Official Footer */}
       <footer className="border-t border-[#DDE1E7] bg-[#0B132B] text-white py-10 mt-12">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8 text-xs font-sans">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Building2 className="w-6 h-6 text-[#C49A45]" />
-              <span className="text-xl font-bold font-heading">CityWall</span>
+              <span className="text-xl font-bold font-heading">CivicReport</span>
             </div>
             <p className="text-gray-400 leading-relaxed">
               Official City Government Online Services portal for public civic issue reporting, real-time AI dispatching, and municipal monitoring.
@@ -204,13 +178,13 @@ export const Layout = () => {
             <h5 className="font-mono text-[#C49A45] font-bold text-sm uppercase">Contact Helpline</h5>
             <p className="text-gray-300">City Hall, Central Municipal Square</p>
             <p className="text-gray-300">Emergency Hotline: <strong>1916 / 1070</strong></p>
-            <p className="text-gray-300">Email: <strong>support@citywall.gov</strong></p>
+            <p className="text-gray-300">Email: <strong>support@civicreport.gov</strong></p>
           </div>
         </div>
 
         <div className="max-w-7xl mx-auto px-6 pt-8 mt-8 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 font-sans gap-2">
-          <p>© 2026 CityWall Government Online Services — All Rights Reserved.</p>
-          <p className="font-mono text-gray-400">The official guide to living, working, and investing in our city.</p>
+          <p>© 2026 CivicReport Government Online Services — All Rights Reserved.</p>
+          <p className="font-mono text-gray-400">The official portal for reporting, tracking, and resolving civic issues in our city.</p>
         </div>
       </footer>
     </div>

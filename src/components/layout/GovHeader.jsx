@@ -1,46 +1,26 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Phone, Mail, Globe, Facebook, Twitter, Instagram, Video, UserCheck, Building2, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export const GovHeader = () => {
   const { user, openAuthModal, logout } = useAuth();
-  const [language, setLanguage] = useState('English');
-
   return (
     <div className="w-full bg-[#0B132B] text-gray-300 border-b border-gray-800 text-xs font-sans select-none">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-3">
-        {/* Left Contact Details */}
         <div className="flex items-center gap-6 font-mono text-[11px] text-gray-300">
-          <a href="tel:+1999806915" className="flex items-center gap-1.5 hover:text-[#C49A45] transition-colors">
+          <a href="tel:1916" className="flex items-center gap-1.5 hover:text-[#C49A45] transition-colors">
             <Phone className="w-3.5 h-3.5 text-[#C49A45]" />
-            <span>+199(980) 6915</span>
+            <span>1916 / 1070</span>
           </a>
           <span className="text-gray-700">|</span>
-          <a href="mailto:shifamoni@gmail.com" className="flex items-center gap-1.5 hover:text-[#C49A45] transition-colors">
+          <a href="mailto:support@civicreport.gov" className="flex items-center gap-1.5 hover:text-[#C49A45] transition-colors">
             <Mail className="w-3.5 h-3.5 text-[#C49A45]" />
-            <span>shifamoni@gmail.com</span>
+            <span>support@civicreport.gov</span>
           </a>
         </div>
 
         {/* Right Language & Social Icons & Role Badge */}
         <div className="flex items-center gap-6 text-[11px]">
-          {/* Language Selector */}
-          <div className="flex items-center gap-1.5 text-gray-300 cursor-pointer hover:text-[#C49A45]">
-            <Globe className="w-3.5 h-3.5 text-[#C49A45]" />
-            <span>Language:</span>
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className="bg-transparent border-none text-white font-semibold cursor-pointer focus:outline-none"
-            >
-              <option value="English" className="bg-[#0B132B] text-white">English</option>
-              <option value="Spanish" className="bg-[#0B132B] text-white">Español</option>
-              <option value="Hindi" className="bg-[#0B132B] text-white">Hindi</option>
-            </select>
-          </div>
-
-          <span className="text-gray-700 hidden md:inline">|</span>
-
           {/* Social Links */}
           <div className="hidden md:flex items-center gap-3 text-gray-400">
             <span className="text-gray-400 font-sans">Follow on:</span>
