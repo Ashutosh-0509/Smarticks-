@@ -68,7 +68,7 @@ export const Layout = () => {
 
 
             {/* Authority Dashboard Link */}
-            {user?.role === 'admin' && (
+            {user?.role === 'staff' && (
               <NavLink
                 to="/dashboard"
                 className={({ isActive }) =>
@@ -133,10 +133,10 @@ export const Layout = () => {
           <UserCheck className="w-5 h-5 mb-0.5" />
           <span>Citizen</span>
         </NavLink>
-        {user?.role === 'admin' && (
+        {user?.role === 'staff' && (
           <NavLink to="/dashboard" className="flex flex-col items-center justify-center py-1 px-3 rounded-lg text-xs font-medium text-gray-700 hover:text-[#C49A45]">
             <LayoutDashboard className="w-5 h-5 mb-0.5" />
-            <span>Admin</span>
+            <span>Authority</span>
           </NavLink>
         )}
       </nav>

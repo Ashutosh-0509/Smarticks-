@@ -13,6 +13,7 @@ export const AuthModal = () => {
     otpCode,
     authError,
     isLoading,
+    setRequestedRole,
     setEmail,
     setOtpCode,
     closeAuthModal,
@@ -97,9 +98,56 @@ export const AuthModal = () => {
           </div>
 
           <div className="p-6 space-y-6">
+            {/* STEP 0: ROLE SELECTION */}
+            {authModalStep === 'role_selection' && (
+              <div className="space-y-5">
+                <div className="space-y-1">
+                  <h4 className="text-xl font-bold font-heading text-[#14213D]">
+                    Welcome to CivicReport
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    Please select your portal to continue.
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-1 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRequestedRole('citizen');
+                      setAuthModalStep('email_input');
+                    }}
+                    className="flex flex-col items-center justify-center p-4 border-2 border-[#DDE1E7] rounded-lg hover:border-[#14213D] hover:bg-gray-50 transition-all text-left"
+                  >
+                    <span className="font-bold text-[#14213D] text-lg">Citizen Portal</span>
+                    <span className="text-xs text-gray-500 text-center mt-1">Report issues and track your civic complaints</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRequestedRole('staff');
+                      setAuthModalStep('email_input');
+                    }}
+                    className="flex flex-col items-center justify-center p-4 border-2 border-[#DDE1E7] rounded-lg hover:border-[#E8963C] hover:bg-orange-50 transition-all text-left"
+                  >
+                    <span className="font-bold text-[#14213D] text-lg">Municipal Authority</span>
+                    <span className="text-xs text-gray-500 text-center mt-1">Official dispatch & officer control center</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* STEP 1: EMAIL ENTRY */}
             {authModalStep === 'email_input' && (
               <form onSubmit={handleEmailSubmit} className="space-y-5">
+                <button
+                  type="button"
+                  onClick={() => setAuthModalStep('role_selection')}
+                  className="inline-flex items-center gap-1 text-xs font-mono text-gray-500 hover:text-[#14213D]"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" /> Back
+                </button>
                 <div className="space-y-1">
                   <h4 className="text-xl font-bold font-heading text-[#14213D]">
                     Sign In

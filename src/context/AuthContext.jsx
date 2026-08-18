@@ -24,7 +24,8 @@ export const AuthProvider = ({ children }) => {
   });
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(() => !localStorage.getItem('auth_token'));
-  const [authModalStep, setAuthModalStep] = useState('email_input'); // 'email_input' | 'otp_input'
+  const [authModalStep, setAuthModalStep] = useState('role_selection'); // 'role_selection' | 'email_input' | 'otp_input'
+  const [requestedRole, setRequestedRole] = useState('citizen');
   const [email, setEmail] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [authError, setAuthError] = useState('');
@@ -41,7 +42,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const openAuthModal = () => {
-    setAuthModalStep('email_input');
+    setAuthModalStep('role_selection');
     setAuthError('');
     setIsAuthModalOpen(true);
   };
@@ -89,7 +90,7 @@ export const AuthProvider = ({ children }) => {
       const res = await fetch('http://localhost:3001/api/auth/verify-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code: inputOtp })
+        body: JSON.stringify({ email, code: inputOtp, requested_role: requestedRole })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Invalid OTP');
@@ -113,7 +114,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     localStorage.removeItem('auth_token');
     setIsAuthModalOpen(true);
-    setAuthModalStep('email_input');
+    setAuthModalStep('role_selection');
   };
 
   return (
@@ -122,10 +123,12 @@ export const AuthProvider = ({ children }) => {
         user,
         isAuthModalOpen,
         authModalStep,
+        requestedRole,
         email,
         otpCode,
         authError,
         isLoading,
+        setRequestedRole,
         setEmail,
         setOtpCode,
         openAuthModal,

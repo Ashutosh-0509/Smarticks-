@@ -36,17 +36,17 @@ export const GovHeader = () => {
           {user ? (
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-white/10 border border-white/20 font-mono text-[11px]">
-                {user.role === 'admin' ? (
+                {user.role === 'staff' ? (
                   <>
                     <Building2 className="w-3 h-3 text-[#C49A45]" />
-                    <span className="text-[#C49A45] font-bold">OFFICER:</span>
-                    <span className="text-white">{user.name}</span>
+                    <span className="text-[#C49A45] font-bold">AUTHORITY:</span>
+                    <span className="text-white">{user.email}</span>
                   </>
                 ) : (
                   <>
                     <UserCheck className="w-3 h-3 text-[#4A9B6E]" />
                     <span className="text-[#4A9B6E] font-bold">CITIZEN:</span>
-                    <span className="text-white">{user.phone}</span>
+                    <span className="text-white">{user.email}</span>
                   </>
                 )}
               </span>

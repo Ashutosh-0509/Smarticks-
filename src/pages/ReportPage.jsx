@@ -11,6 +11,17 @@ import { ComplaintReview } from '../components/complaint/ComplaintReview';
 import { Button } from '../components/ui/Button';
 import { analyzeComplaint, submitComplaint } from '../services/complaintService';
 
+const PrioritySignal = ({ priority }) => {
+  const isHigh = priority === 'High' || priority === 'Urgent';
+  return (
+    <span className={`inline-flex items-center gap-1 text-[10px] font-bold font-mono px-2 py-0.5 rounded ${
+      isHigh ? 'bg-[#D64545]/10 text-[#D64545]' : 'bg-[#E8963C]/10 text-[#E8963C]'
+    }`}>
+      {isHigh ? '🔴 HIGH PRIORITY' : '🟡 MEDIUM PRIORITY'}
+    </span>
+  );
+};
+
 export const ReportPage = () => {
   const navigate = useNavigate();
 

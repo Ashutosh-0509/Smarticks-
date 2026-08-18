@@ -75,7 +75,7 @@ app.post('/api/auth/send-code', async (req, res) => {
 
 app.post('/api/auth/verify-code', async (req, res) => {
   try {
-    const { email, code } = req.body;
+    const { email, code, requested_role } = req.body;
     if (!email || !code) return res.status(400).json({ error: "Email and code required" });
 
     const { data: otps, error: fetchError } = await supabase
@@ -116,13 +116,13 @@ app.post('/api/auth/verify-code', async (req, res) => {
       .eq('email', email)
       .limit(1);
 
-    let userRole = 'citizen';
+    let userRole = requested_role || 'citizen';
     let userId = null;
 
     if (!profiles || profiles.length === 0) {
       const { data: newProfile, error: insertError } = await supabase
         .from('profiles')
-        .insert([{ email, role: 'citizen' }])
+        .insert([{ email, role: userRole }])
         .select()
         .single();
       
@@ -135,7 +135,14 @@ app.post('/api/auth/verify-code', async (req, res) => {
       }
     } else {
       userId = profiles[0].id;
-      userRole = profiles[0].role;
+      
+      // HACKATHON DEMO: Override their role to what they clicked on the UI
+      if (requested_role && profiles[0].role !== requested_role) {
+         await supabase.from('profiles').update({ role: requested_role }).eq('id', userId);
+         userRole = requested_role;
+      } else {
+         userRole = profiles[0].role;
+      }
     }
 
     const token = jwt.sign(
