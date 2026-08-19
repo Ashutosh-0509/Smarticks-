@@ -10,7 +10,7 @@ export const StatusTimeline = ({ timeline = [], currentStatus = 'Submitted' }) =
 
   return (
     <div className="w-full space-y-4 py-2">
-      <h4 className="text-sm font-semibold font-heading uppercase text-gray-500 tracking-wider">
+      <h4 className="text-[11px] font-sans font-semibold uppercase text-gray-500 tracking-[0.05em]">
         STATUS TIMELINE
       </h4>
       <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2.5 before:bottom-2.5 before:w-0.5 before:bg-[#DDE1E7]">
@@ -51,15 +51,15 @@ export const StatusTimeline = ({ timeline = [], currentStatus = 'Submitted' }) =
               </div>
 
               {/* Timestamp */}
-              <div className="text-right whitespace-nowrap">
+              <div className="text-right whitespace-nowrap pt-0.5">
                 {entry?.timestamp ? (
-                  <span className="text-xs font-mono text-gray-500 bg-[#F4F5F7] px-2 py-1 rounded border border-[#DDE1E7]">
+                  <span className="text-[11px] font-sans font-medium text-gray-500 uppercase tracking-wide">
                     {entry.timestamp}
                   </span>
                 ) : isUpcoming ? (
-                  <span className="text-xs font-mono text-gray-400">Pending</span>
+                  <span className="text-[11px] font-sans font-medium text-gray-400 uppercase tracking-wide">Pending</span>
                 ) : isCurrent ? (
-                  <span className="text-xs font-mono text-[#E8963C] font-semibold">Active</span>
+                  <span className="text-[11px] font-sans font-semibold text-[#E8963C] uppercase tracking-wide">Active</span>
                 ) : null}
               </div>
             </motion.div>

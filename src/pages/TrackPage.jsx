@@ -17,6 +17,16 @@ export const TrackPage = () => {
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showFullAddress, setShowFullAddress] = useState(false);
+
+  const formatSimpleAddress = (fullAddress) => {
+    if (!fullAddress) return '';
+    const parts = fullAddress.split(',').map(p => p.trim());
+    if (parts.length <= 4) return fullAddress;
+    const pincode = parts.find(p => /^\d{6}$/.test(p)) || '';
+    const mainParts = parts.slice(0, 3).join(', ');
+    return pincode ? `${mainParts} - ${pincode}` : mainParts;
+  };
 
   const fetchComplaint = async (targetId) => {
     setLoading(true);
@@ -96,7 +106,7 @@ export const TrackPage = () => {
             {/* Top Identity & Status Badge */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#DDE1E7]">
               <div>
-                <span className="text-xs font-mono font-bold text-gray-500 block mb-1">
+                <span className="text-[11px] font-sans font-semibold text-gray-500 uppercase tracking-[0.05em] block mb-1">
                   COMPLAINT #{complaint.id}
                 </span>
                 <h1 className="text-2xl font-bold font-heading text-[#14213D]">
@@ -106,18 +116,17 @@ export const TrackPage = () => {
 
               <div className="flex items-center gap-3">
                 <PrioritySignal priority={complaint.priority} />
-                <span className="px-3 py-1 bg-[#14213D] text-white font-mono text-xs font-semibold rounded">
+                <span className="px-2.5 py-0.5 bg-[#14213D]/10 text-[#14213D] border border-[#14213D]/20 font-sans text-[11px] font-semibold uppercase tracking-[0.05em] rounded">
                   {complaint.status}
                 </span>
               </div>
             </div>
 
-            {/* Metadata Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="flex items-start gap-2.5">
                 <Building2 className="w-4 h-4 text-gray-400 mt-1" />
                 <div>
-                  <span className="text-xs font-mono text-gray-500 uppercase block">DEPARTMENT</span>
+                  <span className="text-[11px] font-sans font-semibold text-gray-500 uppercase tracking-[0.05em] block mb-1">DEPARTMENT</span>
                   <span className="text-sm font-semibold font-sans text-[#14213D]">
                     {complaint.department_name}
                   </span>
@@ -125,20 +134,29 @@ export const TrackPage = () => {
               </div>
 
               <div className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-[#E8963C] mt-1" />
+                <MapPin className="w-4 h-4 text-[#E8963C] mt-1 shrink-0" />
                 <div>
-                  <span className="text-xs font-mono text-gray-500 uppercase block">LOCATION</span>
-                  <span className="text-sm font-semibold font-sans text-[#14213D]">
-                    {complaint.location}
-                  </span>
+                  <span className="text-[11px] font-sans font-semibold text-gray-500 uppercase tracking-[0.05em] block mb-1">LOCATION</span>
+                  <div className="text-sm font-semibold font-sans text-[#14213D]">
+                    {showFullAddress ? complaint.location : formatSimpleAddress(complaint.location)}
+                  </div>
+                  {complaint.location && complaint.location.split(',').length > 4 && (
+                    <button
+                      type="button"
+                      onClick={() => setShowFullAddress(!showFullAddress)}
+                      className="text-[11px] text-[#C49A45] hover:underline font-semibold mt-1"
+                    >
+                      {showFullAddress ? 'Hide full address' : 'View full address'}
+                    </button>
+                  )}
                 </div>
               </div>
 
               <div className="flex items-start gap-2.5">
                 <Calendar className="w-4 h-4 text-gray-400 mt-1" />
                 <div>
-                  <span className="text-xs font-mono text-gray-500 uppercase block">LOGGED ON</span>
-                  <span className="text-sm font-mono text-[#14213D]">
+                  <span className="text-[11px] font-sans font-semibold text-gray-500 uppercase tracking-[0.05em] block mb-1">LOGGED ON</span>
+                  <span className="text-sm font-sans font-medium text-[#14213D]">
                     {new Date(complaint.created_at).toLocaleDateString('en-GB', {
                       day: '2-digit',
                       month: 'short',
@@ -152,7 +170,7 @@ export const TrackPage = () => {
             {/* Description & Image */}
             <div className="space-y-3 pt-4 border-t border-[#DDE1E7]">
               <div>
-                <span className="text-xs font-mono text-gray-500 uppercase block mb-1">
+                <span className="text-[11px] font-sans font-semibold text-gray-500 uppercase tracking-[0.05em] block mb-1">
                   CITIZEN REPORT DESCRIPTION
                 </span>
                 <p className="text-sm text-gray-700 font-sans leading-relaxed">
@@ -161,7 +179,7 @@ export const TrackPage = () => {
               </div>
 
               {complaint.image_url && (
-                <div className="w-full max-w-md h-48 rounded-lg overflow-hidden border border-[#DDE1E7] bg-[#F4F5F7] mt-3">
+                <div className="w-full max-w-md mx-auto h-56 rounded-lg overflow-hidden border border-[#DDE1E7] bg-[#F4F5F7] mt-3">
                   <img
                     src={complaint.image_url}
                     alt={complaint.title}
@@ -182,10 +200,13 @@ export const TrackPage = () => {
 
           {/* Location Map Snapshot */}
           <div className="rounded-lg border border-[#DDE1E7] bg-white p-6 shadow-sm space-y-3">
-            <h4 className="text-sm font-semibold font-heading text-[#14213D] uppercase tracking-wider">
+            <h4 className="text-[11px] font-sans font-semibold text-gray-500 uppercase tracking-[0.05em] mb-1">
               LOCATION MAP SNAPSHOT
             </h4>
             <MapView complaints={[complaint]} center={[complaint.coordinates.lat, complaint.coordinates.lng]} zoom={15} height="280px" />
+            <p className="text-xs text-gray-500 italic mt-2 text-center">
+              Map centered on reported issue location.
+            </p>
           </div>
         </motion.div>
       ) : null}

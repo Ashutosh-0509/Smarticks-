@@ -28,18 +28,18 @@ export async function getComplaints(filters = {}) {
   const { data, error } = await query;
   if (error) {
     console.error("Error fetching complaints:", error);
-    return [];
+    throw error;
   }
 
-  let result = data;
+  let result = data || [];
   if (filters.search) {
     const q = filters.search.toLowerCase();
     result = result.filter(
       (c) =>
-        c.id.toLowerCase().includes(q) ||
-        c.title.toLowerCase().includes(q) ||
-        c.description.toLowerCase().includes(q) ||
-        c.location.toLowerCase().includes(q)
+        (c.id && c.id.toLowerCase().includes(q)) ||
+        (c.title && c.title.toLowerCase().includes(q)) ||
+        (c.description && c.description.toLowerCase().includes(q)) ||
+        (c.location && c.location.toLowerCase().includes(q))
     );
   }
 

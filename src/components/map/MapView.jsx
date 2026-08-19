@@ -57,7 +57,7 @@ export const MapView = ({ complaints = [], center = [19.0760, 73.0033], zoom = 1
           }`}
         >
           <Flame className="w-3.5 h-3.5 text-white" />
-          <span>Danger Heatmap</span>
+          <span>Priority Heatmap</span>
         </button>
       </div>
 
@@ -149,9 +149,9 @@ export const MapView = ({ complaints = [], center = [19.0760, 73.0033], zoom = 1
                 >
                   <Popup>
                     <div className="p-2 space-y-1 font-sans text-xs">
-                      <span className="font-mono font-bold text-[#D64545]">🔥 HEATMAP DENSITY ZONE</span>
+                      <span className="font-mono font-bold text-[#D64545]">HEATMAP DENSITY ZONE</span>
                       <h5 className="font-bold text-[#14213D]">{item.title}</h5>
-                      <p className="text-gray-600">Hazard Priority: <strong>{item.priority}</strong></p>
+                      <p className="text-gray-600">Priority: <strong>{item.priority}</strong></p>
                       <p className="text-gray-500 font-mono">Location: {item.location}</p>
                     </div>
                   </Popup>

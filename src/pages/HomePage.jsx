@@ -27,42 +27,29 @@ export const HomePage = () => {
     <div className="w-full space-y-12">
       {/* GRAND HERO BANNER with Crisp Municipal Building Image & Clear Overlay */}
       <section
-        className="relative w-full min-h-[580px] bg-cover bg-center bg-no-repeat flex items-center justify-start overflow-hidden"
-        style={{
-          backgroundImage: `linear-gradient(to right, rgba(15, 23, 42, 0.55), rgba(15, 23, 42, 0.25)), url('/hero-bg.jpg')`
-        }}
+        className="relative w-full min-h-[480px] bg-[#0B1E3D] flex items-center justify-start overflow-hidden"
       >
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 w-full py-20 pb-36 space-y-6">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 w-full py-20 pb-24 space-y-6">
           <div className="max-w-2xl space-y-4">
-            <p className="text-sm font-semibold font-sans uppercase text-white tracking-widest drop-shadow-md">
+            <p className="text-sm font-semibold font-sans uppercase text-gray-300 tracking-widest">
               Civic AI Complaint Action System
             </p>
 
-            <h1 className="text-4xl sm:text-6xl font-extrabold font-heading text-white leading-tight drop-shadow-lg">
+            <h1 className="text-4xl sm:text-6xl font-extrabold font-heading text-white leading-tight">
               Smart Issue Resolution Through Transparent AI
             </h1>
 
-            <p className="text-base text-gray-100 font-sans leading-relaxed max-w-xl drop-shadow-md">
+            <p className="text-base text-gray-100 font-sans leading-relaxed max-w-xl">
               Report local civic problems like potholes or broken streetlights. Our AI automatically classifies issues, assigns priority, and routes them to the right municipal department for faster action.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-4">
+            <div className="pt-4">
               <Link to="/report">
                 <button
                   type="button"
-                  className="px-7 py-3.5 bg-[#C49A45] hover:bg-[#a88235] text-white text-base font-bold rounded font-sans transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg"
+                  className="px-7 py-3.5 bg-[#E8963C] hover:bg-[#c97f2c] text-white text-base font-bold rounded font-sans transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                 >
-                  <span>Discover More</span>
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-              </Link>
-
-              <Link to="/track/CR-1048">
-                <button
-                  type="button"
-                  className="px-7 py-3.5 bg-[#C49A45]/35 hover:bg-[#C49A45]/60 text-white border border-[#C49A45]/60 text-base font-semibold rounded font-sans transition-all flex items-center justify-center gap-2 cursor-pointer backdrop-blur-xs"
-                >
-                  <span>Track Status</span>
+                  <span>Report an issue</span>
                   <ArrowRight className="w-5 h-5" />
                 </button>
               </Link>
@@ -75,11 +62,11 @@ export const HomePage = () => {
       <section className="max-w-7xl mx-auto px-4 sm:px-8 -mt-24 relative z-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* CARD 1: AI Reasoning */}
-          <div className="bg-white p-7 rounded-none sm:rounded-lg border border-[#DDE1E7] shadow-xl space-y-4 hover:border-[#C49A45] transition-all group">
-            <div className="w-12 h-12 rounded bg-[#C49A45]/20 border border-[#C49A45]/40 text-[#C49A45] flex items-center justify-center">
+          <div className="bg-white p-7 rounded-lg border border-[#DDE1E7] shadow-sm space-y-4">
+            <div className="text-[#14213D] flex items-center justify-start">
               <Sparkles className="w-6 h-6" />
             </div>
-            <h4 className="text-lg font-bold font-heading text-[#14213D] leading-snug group-hover:text-[#C49A45] transition-colors">
+            <h4 className="text-lg font-bold font-heading text-[#14213D] leading-snug">
               Transparent AI Reasoning
             </h4>
             <p className="text-xs text-gray-600 font-sans leading-relaxed">
@@ -88,11 +75,11 @@ export const HomePage = () => {
           </div>
 
           {/* CARD 2: Public Transparency Map */}
-          <div className="bg-white p-7 rounded-none sm:rounded-lg border border-[#DDE1E7] shadow-xl space-y-4 hover:border-[#C49A45] transition-all group">
-            <div className="w-12 h-12 rounded bg-[#C49A45]/20 border border-[#C49A45]/40 text-[#C49A45] flex items-center justify-center">
+          <div className="bg-white p-7 rounded-lg border border-[#DDE1E7] shadow-sm space-y-4">
+            <div className="text-[#14213D] flex items-center justify-start">
               <Globe className="w-6 h-6" />
             </div>
-            <h4 className="text-lg font-bold font-heading text-[#14213D] leading-snug group-hover:text-[#C49A45] transition-colors">
+            <h4 className="text-lg font-bold font-heading text-[#14213D] leading-snug">
               Public Transparency Map
             </h4>
             <p className="text-xs text-gray-600 font-sans leading-relaxed">
@@ -101,11 +88,11 @@ export const HomePage = () => {
           </div>
 
           {/* CARD 3: Status Tracking */}
-          <div className="bg-white p-7 rounded-none sm:rounded-lg border border-[#DDE1E7] shadow-xl space-y-4 hover:border-[#C49A45] transition-all group">
-            <div className="w-12 h-12 rounded bg-[#C49A45]/20 border border-[#C49A45]/40 text-[#C49A45] flex items-center justify-center">
+          <div className="bg-white p-7 rounded-lg border border-[#DDE1E7] shadow-sm space-y-4">
+            <div className="text-[#14213D] flex items-center justify-start">
               <Activity className="w-6 h-6" />
             </div>
-            <h4 className="text-lg font-bold font-heading text-[#14213D] leading-snug group-hover:text-[#C49A45] transition-colors">
+            <h4 className="text-lg font-bold font-heading text-[#14213D] leading-snug">
               Real-Time Status Tracking
             </h4>
             <p className="text-xs text-gray-600 font-sans leading-relaxed">
@@ -114,11 +101,11 @@ export const HomePage = () => {
           </div>
 
           {/* CARD 4: Department Dashboard */}
-          <div className="bg-white p-7 rounded-none sm:rounded-lg border border-[#DDE1E7] shadow-xl space-y-4 hover:border-[#C49A45] transition-all group">
-            <div className="w-12 h-12 rounded bg-[#14213D] text-[#C49A45] flex items-center justify-center">
+          <div className="bg-white p-7 rounded-lg border border-[#DDE1E7] shadow-sm space-y-4">
+            <div className="text-[#14213D] flex items-center justify-start">
               <Building2 className="w-6 h-6" />
             </div>
-            <h4 className="text-lg font-bold font-heading text-[#14213D] leading-snug group-hover:text-[#C49A45] transition-colors">
+            <h4 className="text-lg font-bold font-heading text-[#14213D] leading-snug">
               Direct Authority Routing
             </h4>
             <p className="text-xs text-gray-600 font-sans leading-relaxed">
@@ -130,19 +117,10 @@ export const HomePage = () => {
 
       {/* BANNER STRIP BELOW CARDS */}
       <section className="max-w-7xl mx-auto px-4 sm:px-8">
-        <div className="rounded-lg border border-[#DDE1E7] bg-white p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm font-sans text-[#14213D] font-medium text-center sm:text-left">
+        <div className="rounded-lg border border-[#DDE1E7] bg-white p-4 sm:p-6 shadow-sm">
+          <p className="text-sm font-sans text-[#14213D] font-medium text-center">
             The official portal for reporting, tracking, and resolving civic issues in our city.
           </p>
-
-          <Link to="/report">
-            <button
-              type="button"
-              className="px-6 py-2.5 bg-[#C49A45] hover:bg-[#a88235] text-white text-xs font-bold font-sans uppercase tracking-wider rounded transition-colors whitespace-nowrap"
-            >
-              Find Your Solution
-            </button>
-          </Link>
         </div>
       </section>
 
@@ -150,12 +128,12 @@ export const HomePage = () => {
       <section className="max-w-7xl mx-auto px-4 sm:px-8 space-y-4">
         <div className="flex items-center justify-between border-b border-[#DDE1E7] pb-4">
           <div>
-            <span className="text-xs font-mono font-bold text-[#C49A45] uppercase tracking-wider block">
+            <span className="text-xs font-mono font-bold text-gray-500 uppercase tracking-wider block">
               REAL-TIME INFRASTRUCTURE ACTION
             </span>
             <h2 className="text-2xl font-bold font-heading text-[#14213D] flex items-center gap-2">
-              <MapPin className="w-6 h-6 text-[#C49A45]" />
-              Live Civic Monitoring Map
+              <MapPin className="w-6 h-6 text-[#E8963C]" />
+              Priority Heatmap
             </h2>
           </div>
           <span className="text-xs font-mono text-gray-500">
@@ -164,6 +142,11 @@ export const HomePage = () => {
         </div>
 
         <MapView complaints={complaints} height="480px" />
+        <div className="pt-2">
+          <p className="text-xs text-gray-500 font-sans italic flex items-center justify-center sm:justify-end gap-1.5">
+            ⚠️ Disclaimer: Location markers are approximate and subject to field verification by municipal engineering staff.
+          </p>
+        </div>
       </section>
 
       {/* RECENT CIVIC REPORTS GRID */}
@@ -172,8 +155,8 @@ export const HomePage = () => {
           <h3 className="text-2xl font-bold font-heading text-[#14213D]">
             Recent Municipal Activity
           </h3>
-          <Link to="/dashboard" className="text-xs font-mono font-semibold text-[#C49A45] hover:underline">
-            Open Authority Command Center →
+          <Link to="/dashboard" className="text-xs font-mono font-semibold text-[#E8963C] hover:underline">
+            Staff Dashboard →
           </Link>
         </div>
 

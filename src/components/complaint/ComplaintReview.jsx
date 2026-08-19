@@ -11,24 +11,24 @@ export const ComplaintReview = ({
   isSubmitting
 }) => {
   return (
-    <div className="rounded-lg border border-[#DDE1E7] bg-white p-6 shadow-sm space-y-6">
-      <div className="flex items-center justify-between pb-4 border-b border-[#DDE1E7]">
+    <div className="space-y-6 pt-2">
+      <div className="flex items-center justify-between pb-4 border-b border-[var(--border-color)]">
         <div>
           <span className="text-xs font-mono font-medium text-[#4A9B6E] uppercase tracking-wider block">
             PRE-SUBMISSION VERIFICATION
           </span>
-          <h3 className="text-xl font-semibold font-heading text-[#14213D]">
+          <h3 className="text-xl font-semibold font-heading text-[var(--ink)]">
             Review your report
           </h3>
         </div>
-        <div className="p-2 bg-[#F4F5F7] rounded-md text-[#14213D]">
+        <div className="p-2 bg-[var(--surface)] rounded-md text-[var(--ink)]">
           <ShieldCheck className="w-5 h-5 text-[#4A9B6E]" />
         </div>
       </div>
 
       {/* Explicit submission reminder */}
-      <div className="p-3 bg-[#F4F5F7] rounded-md border border-[#DDE1E7] text-xs font-sans text-gray-600">
-        ℹ️ <span className="font-semibold text-[#14213D]">Nothing has been submitted yet.</span> Review the details below before sending to municipal dispatch.
+      <div className="p-3 bg-[var(--surface)] rounded-md border border-[var(--border-color)] text-xs font-sans text-gray-600">
+        ℹ️ <span className="font-semibold text-[var(--ink)]">Nothing has been submitted yet.</span> Review the details below before sending to municipal dispatch.
       </div>
 
       {/* Summary Grid */}
@@ -36,7 +36,7 @@ export const ComplaintReview = ({
         {/* Title */}
         <div className="space-y-1">
           <span className="text-xs font-mono text-gray-500 uppercase">ISSUE TITLE</span>
-          <p className="text-base font-semibold font-sans text-[#14213D]">{formData.title}</p>
+          <p className="text-base font-semibold font-sans text-[var(--ink)]">{formData.title}</p>
         </div>
 
         {/* Description */}
@@ -51,19 +51,19 @@ export const ComplaintReview = ({
         {formData.image_url && (
           <div className="space-y-1">
             <span className="text-xs font-mono text-gray-500 uppercase">ATTACHED PHOTO</span>
-            <div className="w-full h-40 rounded-lg overflow-hidden border border-[#DDE1E7] bg-[#F4F5F7]">
+            <div className="w-full h-40 rounded-lg overflow-hidden border border-[var(--border-color)] bg-[var(--surface)]">
               <img src={formData.image_url} alt="Attached photo" className="w-full h-full object-cover" />
             </div>
           </div>
         )}
 
         {/* Categorization & Metadata */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-[#DDE1E7]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-[var(--border-color)]">
           <div className="flex items-center gap-2">
             <Tag className="w-4 h-4 text-gray-400" />
             <div>
               <span className="text-xs font-mono text-gray-500 uppercase block">CATEGORY</span>
-              <span className="text-sm font-semibold font-sans text-[#14213D]">{aiData.category}</span>
+              <span className="text-sm font-semibold font-sans text-[var(--ink)]">{aiData.category}</span>
             </div>
           </div>
 
@@ -76,7 +76,7 @@ export const ComplaintReview = ({
             <Building2 className="w-4 h-4 text-gray-400" />
             <div>
               <span className="text-xs font-mono text-gray-500 uppercase block">DEPARTMENT</span>
-              <span className="text-sm font-semibold font-sans text-[#14213D]">{aiData.department_name}</span>
+              <span className="text-sm font-semibold font-sans text-[var(--ink)]">{aiData.department_name}</span>
             </div>
           </div>
 
@@ -84,14 +84,14 @@ export const ComplaintReview = ({
             <MapPin className="w-4 h-4 text-gray-400" />
             <div>
               <span className="text-xs font-mono text-gray-500 uppercase block">LOCATION</span>
-              <span className="text-sm font-semibold font-sans text-[#14213D]">{formData.location}</span>
+              <span className="text-sm font-semibold font-sans text-[var(--ink)]">{formData.location}</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="pt-4 border-t border-[#DDE1E7] flex flex-col sm:flex-row items-center justify-end gap-3">
+      <div className="pt-4 border-t border-[var(--border-color)] flex flex-col sm:flex-row items-center justify-end gap-3">
         <Button
           type="button"
           variant="secondary"
@@ -107,7 +107,7 @@ export const ComplaintReview = ({
           variant="primary"
           onClick={onFinalSubmit}
           isLoading={isSubmitting}
-          className="w-full sm:w-auto"
+          className="w-full sm:w-auto font-bold bg-[var(--ink)] hover:bg-black"
         >
           Report this issue
         </Button>

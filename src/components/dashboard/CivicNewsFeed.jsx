@@ -5,8 +5,8 @@ const CIVIC_NEWS_ITEMS = [
   {
     id: 'NEWS-881',
     category: 'ROAD ACCIDENT & POTHOLE HAZARD',
-    title: 'Tragic Road Accident Reported Near Sector 17 Market Entrance',
-    summary: 'A two-wheeler commuter lost control due to an unpatched deep pothole near Sector 17 market gate. Municipal Emergency Asphalt Dispatch #4 allocated for immediate resurfacing.',
+    title: 'Road Accident Reported Near Sector 17 Market Entrance',
+    summary: 'Two-wheeler accident reported due to pothole near Sector 17 market gate. Municipal Emergency Asphalt Dispatch #4 allocated for immediate resurfacing.',
     location: 'Sector 17, Main Market Gate',
     severity: 'CRITICAL',
     time: '12 mins ago',
@@ -60,25 +60,24 @@ export const CivicNewsFeed = () => {
     <div className="rounded-lg border border-[#DDE1E7] bg-white p-5 shadow-sm space-y-4 font-sans">
       {/* Header & Live Ticker Indicator */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#DDE1E7] pb-3">
-        <div className="flex items-center gap-2">
-          <div className="p-2 bg-[#D64545]/10 rounded-md text-[#D64545]">
-            <Radio className="w-5 h-5 animate-pulse" />
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-[#F4F5F7] rounded-md border border-[#DDE1E7] text-[#14213D]">
+            <Radio className="w-5 h-5 text-[#E8963C]" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold text-[#D64545] uppercase tracking-wider">
-                LIVE INCIDENT & SAFETY NEWS FEED
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[11px] font-sans font-semibold uppercase tracking-[0.05em] text-[#14213D]">
+                ACTIVE DISPATCH LOG
               </span>
-              <span className="w-2 h-2 rounded-full bg-[#D64545] animate-ping" />
             </div>
             <h4 className="text-lg font-bold font-heading text-[#14213D]">
-              Local Civic Hazard News Alerts
+              Recent Incident Updates
             </h4>
           </div>
         </div>
 
         {/* Severity Filter Tabs */}
-        <div className="flex items-center gap-1.5 font-mono text-xs">
+        <div className="flex items-center gap-1.5 font-sans text-[11px] font-semibold uppercase tracking-[0.05em]">
           {['ALL', 'CRITICAL', 'HIGH', 'RESOLVED'].map((tab) => (
             <button
               key={tab}
@@ -97,12 +96,12 @@ export const CivicNewsFeed = () => {
       </div>
 
       {/* Breaking News Ticker Strip */}
-      <div className="bg-[#D64545]/10 border border-[#D64545]/30 rounded-md p-3 flex items-center gap-3 text-xs text-[#D64545] font-sans">
-        <Flame className="w-4 h-4 flex-shrink-0 animate-bounce text-[#D64545]" />
+      <div className="bg-white border border-[#DDE1E7] shadow-sm rounded-md p-3 flex items-center gap-3 text-xs text-[#14213D] font-sans">
+        <Radio className="w-4 h-4 flex-shrink-0 text-[#D64545]" />
         <p className="font-semibold flex-1 truncate">
-          BREAKING: Fatal pothole accident reported at Sector 17 main market. Emergency asphalt repair squad dispatched.
+          Road accident reported at Sector 17 main market. Emergency asphalt repair squad dispatched.
         </p>
-        <span className="font-mono text-[10px] bg-[#D64545] text-white px-2 py-0.5 rounded font-bold">
+        <span className="text-[10px] font-sans font-semibold uppercase tracking-[0.05em] border border-[#D64545] text-[#D64545] px-2 py-0.5 rounded">
           LIVE ALERT
         </span>
       </div>
@@ -116,11 +115,11 @@ export const CivicNewsFeed = () => {
           >
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-mono font-bold uppercase text-[#14213D] bg-[#F4F5F7] px-2 py-0.5 rounded border border-[#DDE1E7]">
+                <span className="text-[10px] font-sans font-semibold uppercase tracking-[0.05em] text-[#14213D] bg-[#F4F5F7] px-2 py-0.5 rounded border border-[#DDE1E7]">
                   {news.category}
                 </span>
                 <span
-                  className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
+                  className={`text-[10px] font-sans font-semibold uppercase tracking-[0.05em] px-2 py-0.5 rounded ${
                     news.severity === 'CRITICAL'
                       ? 'bg-[#D64545] text-white'
                       : news.severity === 'HIGH'
@@ -141,7 +140,7 @@ export const CivicNewsFeed = () => {
               </p>
             </div>
 
-            <div className="pt-2 border-t border-[#DDE1E7] flex items-center justify-between text-[11px] font-mono text-gray-500">
+            <div className="pt-2 border-t border-[#DDE1E7] flex items-center justify-between text-[11px] font-sans font-medium text-gray-500 uppercase tracking-wide">
               <span>📍 {news.location}</span>
               <span className="text-gray-400">{news.time}</span>
             </div>

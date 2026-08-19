@@ -27,9 +27,9 @@ export const PrioritySignal = ({ priority = 'Medium', className = '' }) => {
   const config = configs[normPriority] || configs.medium;
 
   return (
-    <span className={`inline-flex items-center gap-1.5 font-mono text-xs font-bold ${className}`}>
-      <span className={`w-2.5 h-2.5 rounded-full ${config.bgClass}`} aria-hidden="true" />
-      <span className={config.textClass}>{config.text}</span>
+    <span className={`inline-flex items-center gap-1.5 font-sans text-[11px] font-semibold uppercase tracking-[0.05em] px-2.5 py-0.5 rounded border border-gray-200 bg-white ${config.textClass} ${className}`}>
+      <span className={`w-2 h-2 rounded-full ${config.bgClass}`} aria-hidden="true" />
+      <span>{config.text}</span>
     </span>
   );
 };

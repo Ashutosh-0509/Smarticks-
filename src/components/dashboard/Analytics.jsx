@@ -8,7 +8,9 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell
+  Cell,
+  CartesianGrid,
+  LabelList
 } from 'recharts';
 
 const PALETTE = ['#14213D', '#E8963C', '#D64545', '#4A9B6E', '#6C7A89', '#8A99AD'];
@@ -52,9 +54,11 @@ export const Analytics = ({ complaints = [] }) => {
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={categoryData} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
               <XAxis dataKey="name" stroke="#6C7A89" fontSize={11} tickLine={false} interval={0} angle={-15} textAnchor="end" />
               <YAxis stroke="#6C7A89" fontSize={11} tickLine={false} allowDecimals={false} />
               <Tooltip
+                cursor={{ fill: '#F4F5F7' }}
                 contentStyle={{
                   backgroundColor: '#14213D',
                   borderColor: '#14213D',
@@ -65,7 +69,9 @@ export const Analytics = ({ complaints = [] }) => {
                 }}
                 itemStyle={{ color: '#E8963C' }}
               />
-              <Bar dataKey="count" fill="#14213D" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="count" fill="#E8963C" radius={[4, 4, 0, 0]}>
+                <LabelList dataKey="count" position="top" fill="#14213D" fontSize={11} fontWeight="bold" />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -106,16 +112,22 @@ export const Analytics = ({ complaints = [] }) => {
                   fontSize: '12px'
                 }}
               />
+              <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="text-xl font-bold font-heading fill-[#14213D]">
+                {complaints.length} Active
+              </text>
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div className="flex flex-wrap items-center justify-center gap-3 pt-2 text-xs font-sans">
-          {deptData.map((d, i) => (
-            <div key={d.name} className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: PALETTE[i % PALETTE.length] }} />
-              <span className="text-gray-700 font-medium">{d.name} ({d.value})</span>
-            </div>
-          ))}
+        <div className="flex flex-wrap items-center justify-center gap-4 pt-2 text-xs font-sans">
+          {deptData.map((d, i) => {
+            const percentage = complaints.length ? Math.round((d.value / complaints.length) * 100) : 0;
+            return (
+              <div key={d.name} className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: PALETTE[i % PALETTE.length] }} />
+                <span className="text-gray-700 font-medium">{d.name} ({percentage}%)</span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

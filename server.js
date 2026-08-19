@@ -1,3 +1,6 @@
+import dns from 'node:dns';
+dns.setDefaultResultOrder('ipv4first');
+
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -14,7 +17,7 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' })); // Allow larger payload for base64 images
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SUPABASE_ANON_KEY);
+const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 const transporter = nodemailer.createTransport({
   host: process.env.MAIL_HOST,
@@ -35,8 +38,35 @@ function generateOTP() {
 
 app.post('/api/auth/send-code', async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, role, isRegistration } = req.body;
     if (!email) return res.status(400).json({ error: "Email required" });
+
+    // Handle Staff Registration specific check
+    if (isRegistration && role === 'staff') {
+      const { data: staff, error: staffErr } = await supabase
+        .from('authorized_staff')
+        .select('email')
+        .eq('email', email)
+        .single();
+      
+      if (staffErr || !staff) {
+        return res.status(403).json({ error: "This email is not authorized for staff access. Contact your municipal IT administrator." });
+      }
+    }
+
+    // Handle Login Account Verification
+    if (!isRegistration) {
+      const { data: profile, error: profileErr } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('email', email)
+        .eq('role', role)
+        .single();
+        
+      if (profileErr || !profile) {
+        return res.status(404).json({ error: "No account found for this email. Please register first." });
+      }
+    }
 
     // Rate Limit: 1 per 30s
     const lastSent = emailSendTimestamps.get(email);
@@ -44,13 +74,22 @@ app.post('/api/auth/send-code', async (req, res) => {
       return res.status(429).json({ error: "Please wait 30 seconds before requesting another code." });
     }
 
+    // Security & Hygiene: Invalidate any existing OTPs for this email before issuing a new one
+    await supabase.from('otp_codes').delete().eq('email', email);
+
     const code = generateOTP();
     const code_hash = await bcrypt.hash(code, 10);
     const expires_at = new Date(Date.now() + 5 * 60 * 1000).toISOString();
 
-    const { error: dbError } = await supabase
+    const payload = { email, code_hash, expires_at };
+    console.log('Attempting to write to Supabase:', { table: 'otp_codes', payload });
+
+    const { data, error: dbError } = await supabase
       .from('otp_codes')
-      .insert([{ email, code_hash, expires_at }]);
+      .insert([payload])
+      .select();
+
+    console.log('Supabase write result:', { data, error: dbError });
 
     if (dbError) {
       console.error("DB Error on send-code:", dbError);
@@ -75,7 +114,7 @@ app.post('/api/auth/send-code', async (req, res) => {
 
 app.post('/api/auth/verify-code', async (req, res) => {
   try {
-    const { email, code, requested_role } = req.body;
+    const { email, code, requested_role, name } = req.body;
     if (!email || !code) return res.status(400).json({ error: "Email and code required" });
 
     const { data: otps, error: fetchError } = await supabase
@@ -84,15 +123,20 @@ app.post('/api/auth/verify-code', async (req, res) => {
       .eq('email', email)
       .eq('consumed', false)
       .lt('attempts', 5)
-      .gte('expires_at', new Date().toISOString())
       .order('created_at', { ascending: false })
       .limit(1);
 
     if (fetchError || !otps || otps.length === 0) {
-      return res.status(400).json({ error: "Invalid or expired code" });
+      return res.status(400).json({ error: "Invalid code" });
     }
 
     const otpRecord = otps[0];
+    
+    // Explicit Expiry Handling
+    if (new Date(otpRecord.expires_at) < new Date()) {
+      await supabase.from('otp_codes').delete().eq('id', otpRecord.id);
+      return res.status(400).json({ error: "This code has expired. Request a new one." });
+    }
     const isMatch = await bcrypt.compare(code, otpRecord.code_hash);
 
     if (!isMatch) {
@@ -103,10 +147,10 @@ app.post('/api/auth/verify-code', async (req, res) => {
       return res.status(400).json({ error: "Invalid code" });
     }
 
-    // Mark consumed
+    // Hygiene: Delete OTP record upon successful verification instead of just marking consumed
     await supabase
       .from('otp_codes')
-      .update({ consumed: true })
+      .delete()
       .eq('id', otpRecord.id);
 
     // Find or create profile
@@ -120,9 +164,12 @@ app.post('/api/auth/verify-code', async (req, res) => {
     let userId = null;
 
     if (!profiles || profiles.length === 0) {
+      const insertData = { email, role: userRole };
+      if (name) insertData.name = name;
+
       const { data: newProfile, error: insertError } = await supabase
         .from('profiles')
-        .insert([{ email, role: userRole }])
+        .insert([insertData])
         .select()
         .single();
       
@@ -145,8 +192,10 @@ app.post('/api/auth/verify-code', async (req, res) => {
       }
     }
 
+    const tokenPayloadName = (!profiles || profiles.length === 0) ? name : profiles[0].name;
+
     const token = jwt.sign(
-      { id: userId, email, role: userRole },
+      { id: userId, email, role: userRole, name: tokenPayloadName },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -259,3 +308,20 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+// Scheduled Cleanup Job: Delete expired OTPs every 15 minutes as a fallback safety net
+setInterval(async () => {
+  try {
+    const { error } = await supabase
+      .from('otp_codes')
+      .delete()
+      .lt('expires_at', new Date().toISOString());
+    if (error) {
+      console.error("Scheduled OTP Cleanup Error:", error);
+    } else {
+      console.log(`[${new Date().toISOString()}] Cleaned up expired OTPs`);
+    }
+  } catch (err) {
+    console.error("Scheduled OTP Cleanup Exception:", err);
+  }
+}, 15 * 60 * 1000);

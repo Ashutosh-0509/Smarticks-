@@ -10,9 +10,10 @@
   --color-priority-medium: #E8963C;
   --color-priority-low: #4A9B6E;
   --color-border-subtle: #DDE1E7;
+  --color-institutional: #0B1E3D;
 
   --font-heading: "Space Grotesk", sans-serif;
-  --font-sans: "Inter", sans-serif;
+  --font-sans: "Noto Sans", sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
 }
 
@@ -26,10 +27,12 @@
   --priority-medium: #E8963C;
   --priority-low: #4A9B6E;
   --border-color: #DDE1E7;
+  --institutional: #0B1E3D;
+  --text-scale: 1;
 }
 
 body {
-  font-family: "Inter", sans-serif;
+  font-family: "Noto Sans", sans-serif;
   background-color: var(--surface);
   color: var(--ink);
   margin: 0;
@@ -53,7 +56,7 @@ h1, h2, h3, h4, .font-heading {
 
 /* Custom Leaflet Map Styling Override */
 .leaflet-container {
-  font-family: "Inter", sans-serif !important;
+  font-family: "Noto Sans", sans-serif !important;
   z-index: 1;
 }
 

@@ -23,10 +23,11 @@ export const AuthProvider = ({ children }) => {
     return null;
   });
 
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(() => !localStorage.getItem('auth_token'));
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalStep, setAuthModalStep] = useState('role_selection'); // 'role_selection' | 'email_input' | 'otp_input'
   const [requestedRole, setRequestedRole] = useState('citizen');
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [authError, setAuthError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -52,7 +53,7 @@ export const AuthProvider = ({ children }) => {
     setAuthError('');
   };
 
-  const sendOtp = async (inputEmail) => {
+  const sendOtp = async (inputEmail, isRegistration = false, role = null) => {
     if (!inputEmail || !inputEmail.includes('@')) {
       setAuthError('Please enter a valid email address.');
       return false;
@@ -63,9 +64,11 @@ export const AuthProvider = ({ children }) => {
       const res = await fetch('/api/auth/send-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: inputEmail })
+        body: JSON.stringify({ email: inputEmail, isRegistration, role })
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch(e) {}
       if (!res.ok) throw new Error(data.error || 'Failed to send OTP');
       
       setEmail(inputEmail);
@@ -79,7 +82,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const verifyOtp = async (inputOtp) => {
+  const verifyOtp = async (inputOtp, inputName = null) => {
     if (!inputOtp || inputOtp.length !== 6) {
       setAuthError('Please enter a valid 6-digit OTP code.');
       return false;
@@ -90,9 +93,11 @@ export const AuthProvider = ({ children }) => {
       const res = await fetch('/api/auth/verify-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code: inputOtp, requested_role: requestedRole })
+        body: JSON.stringify({ email, code: inputOtp, requested_role: requestedRole, name: inputName })
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch(e) {}
       if (!res.ok) throw new Error(data.error || 'Invalid OTP');
       
       localStorage.setItem('auth_token', data.token);
@@ -113,7 +118,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('auth_token');
-    setIsAuthModalOpen(true);
+    setIsAuthModalOpen(false);
     setAuthModalStep('role_selection');
   };
 
@@ -125,11 +130,13 @@ export const AuthProvider = ({ children }) => {
         authModalStep,
         requestedRole,
         email,
+        name,
         otpCode,
         authError,
         isLoading,
         setRequestedRole,
         setEmail,
+        setName,
         setOtpCode,
         openAuthModal,
         closeAuthModal,

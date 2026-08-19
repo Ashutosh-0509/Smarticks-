@@ -35,7 +35,7 @@ export const ComplaintTable = ({ complaints = [], onSelectComplaint }) => {
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-[#F4F5F7] border-b border-[#DDE1E7] text-xs font-mono text-gray-500 uppercase tracking-wider">
+            <tr className="bg-[#F4F5F7] border-b border-[#DDE1E7] text-[11px] font-sans font-semibold text-gray-500 uppercase tracking-[0.05em]">
               <th className="py-3 px-4 font-semibold">ID</th>
               <th className="py-3 px-4 font-semibold">COMPLAINT</th>
               <th className="py-3 px-4 font-semibold">CATEGORY</th>
@@ -59,24 +59,24 @@ export const ComplaintTable = ({ complaints = [], onSelectComplaint }) => {
                 <tr
                   key={item.id}
                   onClick={() => onSelectComplaint(item)}
-                  className="hover:bg-[#F4F5F7]/80 cursor-pointer transition-colors"
+                  className="hover:bg-[#FDF8F3] even:bg-gray-50/50 cursor-pointer transition-colors group"
                 >
                   {/* ID */}
-                  <td className="py-3.5 px-4 font-mono font-semibold text-[#14213D]">
+                  <td className="py-3.5 px-4 font-sans text-[11px] font-semibold text-gray-500 uppercase tracking-[0.05em]">
                     {item.id}
                   </td>
 
                   {/* Title & Location */}
                   <td className="py-3.5 px-4 max-w-xs">
-                    <p className="font-semibold text-[#14213D] truncate">{item.title}</p>
-                    <p className="text-xs text-gray-500 truncate">{item.location}</p>
+                    <p className="font-semibold text-[#14213D] line-clamp-1">{item.title}</p>
+                    <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">{item.location}</p>
                   </td>
 
                   {/* Category */}
                   <td className="py-3.5 px-4 font-medium text-gray-700">{item.category}</td>
 
                   {/* Priority Signal */}
-                  <td className="py-3.5 px-4">
+                  <td className="py-3.5 px-4 whitespace-nowrap">
                     <PrioritySignal priority={item.priority} />
                   </td>
 
@@ -97,12 +97,12 @@ export const ComplaintTable = ({ complaints = [], onSelectComplaint }) => {
                   </td>
 
                   {/* Staff Only Evidence Badge */}
-                  <td className="py-3.5 px-4">
+                  <td className="py-3.5 px-4 whitespace-nowrap">
                     <EvidenceBadge score={item.evidence_score} />
                   </td>
 
                   {/* Created Date */}
-                  <td className="py-3.5 px-4 font-mono text-xs text-gray-500 whitespace-nowrap">
+                  <td className="py-3.5 px-4 font-sans text-[11px] font-semibold text-gray-500 uppercase tracking-[0.05em] whitespace-nowrap">
                     {formatDate(item.created_at)}
                   </td>
 
@@ -114,7 +114,7 @@ export const ComplaintTable = ({ complaints = [], onSelectComplaint }) => {
                         e.stopPropagation();
                         onSelectComplaint(item);
                       }}
-                      className="p-1.5 rounded-md hover:bg-[#DDE1E7] text-[#14213D]"
+                      className="p-1.5 rounded-md text-[#14213D] group-hover:bg-[#E8963C] group-hover:text-white transition-colors"
                       aria-label="Inspect complaint detail"
                     >
                       <ChevronRight className="w-4 h-4" />
