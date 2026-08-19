@@ -65,7 +65,17 @@ export const Layout = () => {
               <span>Citizen Portal</span>
             </NavLink>
 
-
+            {/* Live News Link */}
+            <NavLink
+              to="/news"
+              className={({ isActive }) =>
+                `flex items-center gap-1 py-2 hover:text-[#C49A45] transition-colors ${
+                  isActive ? 'text-[#C49A45] font-semibold' : ''
+                }`
+              }
+            >
+              <span>Civic News</span>
+            </NavLink>
 
             {/* Authority Dashboard Link */}
             {user?.role === 'staff' && (
@@ -80,8 +90,6 @@ export const Layout = () => {
                 <span>Authority Dashboard</span>
               </NavLink>
             )}
-
-
 
             {/* Contact */}
             <Link to="/track/CR-1048" className="hover:text-[#C49A45] transition-colors">

@@ -128,9 +128,6 @@ export const DashboardPage = () => {
       {/* KPI Stats Bar */}
       <StatsCards stats={stats} loading={loading && allComplaints.length === 0} />
 
-      {/* Live Civic Emergency & Road Hazard News Feed */}
-      <CivicNewsFeed />
-
       {/* Filter Control Bar */}
       <FilterBar filters={filters} onFilterChange={setFilters} onExport={handleExportCSV} />
 

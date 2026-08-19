@@ -12,6 +12,8 @@ import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { SiteFeedbackPage } from './pages/SiteFeedbackPage';
 import { useAuth } from './context/AuthContext';
 
+import { NewsPage } from './pages/NewsPage';
+
 const ProtectedRoute = ({ children }) => {
   const { user, openAuthModal } = useAuth();
   
@@ -38,6 +40,7 @@ export function App() {
             <Route path="report" element={<ProtectedRoute><ReportPage /></ProtectedRoute>} />
             <Route path="track/:id" element={<ProtectedRoute><TrackPage /></ProtectedRoute>} />
             <Route path="track" element={<Navigate to="/track/CR-1048" replace />} />
+            <Route path="news" element={<NewsPage />} />
             <Route path="citizen-portal" element={<ProtectedRoute><CitizenDashboardPage /></ProtectedRoute>} />
             <Route path="dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="accessibility" element={<AccessibilityPage />} />
