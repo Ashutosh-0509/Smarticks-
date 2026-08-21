@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, AlertTriangle, Edit3, ArrowRight } from 'lucide-react';
+import { Edit3, ArrowRight } from 'lucide-react';
 import { PrioritySignal } from './PrioritySignal';
 import { MOCK_CATEGORIES, MOCK_DEPARTMENTS } from '../../data/mockComplaints';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const AIAnalysisCard = ({
   isAnalyzing,
   aiResult,
-  onConfirm,
-  onEditToggle,
-  onPhotoRetry,
-  onContinueWithoutPhoto
+  onConfirm
 }) => {
+  const { t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
   const [editedCategory, setEditedCategory] = useState(aiResult?.category || 'Pothole');
   const [editedPriority, setEditedPriority] = useState(aiResult?.priority || 'High');
@@ -27,15 +26,15 @@ export const AIAnalysisCard = ({
   // Handle progressive loading
   if (isAnalyzing) {
     return (
-      <div className="space-y-4 text-center py-10">
+      <div className="space-y-4 text-center py-10 font-sans">
         <div className="flex flex-col items-center justify-center space-y-4">
           <div className="w-8 h-8 border-4 border-[var(--border-color)] border-t-[var(--ink)] rounded-full animate-spin" />
           <div>
             <h4 className="text-lg font-semibold font-heading text-[var(--ink)]">
-              Analyzing complaint...
+              {t('ai.analyzing')}
             </h4>
             <p className="text-sm font-sans text-gray-500 mt-1">
-              Classifying issue and determining department routing
+              {t('ai.classifying')}
             </p>
           </div>
         </div>
@@ -45,54 +44,16 @@ export const AIAnalysisCard = ({
 
   if (!aiResult) return null;
 
-  // Handle potential evidence photo mismatch fallback UI
-  const isPhotoMismatch = aiResult.evidence_score < 30 && aiResult.evidence_flags?.length > 0;
-
-  if (isPhotoMismatch) {
-    return (
-      <div className="rounded border border-[#E8963C] bg-orange-50/50 p-6 space-y-4">
-        <div className="flex items-start gap-3">
-          <AlertTriangle className="w-6 h-6 text-[#E8963C] flex-shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <h4 className="text-base font-semibold font-heading text-[#14213D]">
-              We couldn't confidently match the photo to the reported issue.
-            </h4>
-            <p className="text-sm text-gray-600 font-sans">
-              The photo provided may not clearly show the details of the problem. You can try uploading another photo or continue without one.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
-          <button
-            type="button"
-            onClick={onPhotoRetry}
-            className="w-full sm:w-auto px-4 py-2 bg-[var(--ink)] text-white text-sm font-medium rounded hover:bg-black cursor-pointer"
-          >
-            Try another photo
-          </button>
-          <button
-            type="button"
-            onClick={onContinueWithoutPhoto}
-            className="w-full sm:w-auto px-4 py-2 bg-[var(--surface)] border border-[var(--border-color)] text-[var(--ink)] text-sm font-medium rounded hover:bg-gray-200 cursor-pointer"
-          >
-            Continue without photo
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   const currentDeptName =
     MOCK_DEPARTMENTS.find((d) => d.id === editedDeptId)?.name || aiResult.department_name;
 
   return (
-    <div className="space-y-6 pt-2">
+    <div className="space-y-6 pt-2 font-sans">
       {/* Top Banner Notice */}
       <div className="p-4 bg-[var(--surface)] rounded border border-[var(--border-color)]">
         <p className="text-sm font-sans text-[var(--ink)] font-medium leading-relaxed">
-          We think this is a <span className="font-semibold">{editedCategory}</span>,{' '}
-          <span className="font-semibold">{editedPriority.toLowerCase()} priority</span>, going to{' '}
+          {t('ai.thinksPre')} <span className="font-semibold">{editedCategory}</span>,{' '}
+          <span className="font-semibold">{editedPriority.toLowerCase()}</span> {t('ai.thinksPost')}{' '}
           <span className="font-semibold">{currentDeptName}</span>.
         </p>
       </div>
@@ -101,7 +62,7 @@ export const AIAnalysisCard = ({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Category */}
         <div className="p-3 rounded border border-[var(--border-color)] bg-[var(--surface-card)]">
-          <span className="text-xs font-mono text-gray-500 uppercase block mb-1">CATEGORY</span>
+          <span className="text-xs font-mono text-gray-500 uppercase block mb-1">{t('ai.categoryLabel')}</span>
           {isEditing ? (
             <select
               value={editedCategory}
@@ -123,7 +84,7 @@ export const AIAnalysisCard = ({
 
         {/* Priority */}
         <div className="p-3 rounded border border-[var(--border-color)] bg-[var(--surface-card)]">
-          <span className="text-xs font-mono text-gray-500 uppercase block mb-1">PRIORITY</span>
+          <span className="text-xs font-mono text-gray-500 uppercase block mb-1">{t('ai.priorityLabel')}</span>
           {isEditing ? (
             <select
               value={editedPriority}
@@ -141,7 +102,7 @@ export const AIAnalysisCard = ({
 
         {/* Department */}
         <div className="p-3 rounded border border-[var(--border-color)] bg-[var(--surface-card)]">
-          <span className="text-xs font-mono text-gray-500 uppercase block mb-1">DEPARTMENT</span>
+          <span className="text-xs font-mono text-gray-500 uppercase block mb-1">{t('ai.departmentLabel')}</span>
           {isEditing ? (
             <select
               value={editedDeptId}
@@ -165,19 +126,19 @@ export const AIAnalysisCard = ({
       {/* AI Explanation Section */}
       <div className="space-y-3 pt-2 border-t border-[var(--border-color)] mt-4">
         <div className="mt-4">
-          <span className="text-xs font-mono text-gray-500 uppercase block mb-1">AI SUMMARY</span>
+          <span className="text-xs font-mono text-gray-500 uppercase block mb-1">{t('ai.aiSummaryLabel')}</span>
           <p className="text-sm text-gray-700 font-sans leading-relaxed">{aiResult.ai_summary}</p>
         </div>
 
         <div>
-          <span className="text-xs font-mono text-gray-500 uppercase block mb-1">AI REASONING</span>
+          <span className="text-xs font-mono text-gray-500 uppercase block mb-1">{t('ai.aiReasoningLabel')}</span>
           <p className="text-xs text-gray-600 font-sans leading-relaxed">{aiResult.ai_reasoning}</p>
         </div>
       </div>
 
       {/* Confirmation & Actions */}
       <div className="pt-4 border-t border-[var(--border-color)] flex flex-col sm:flex-row items-center justify-between gap-3">
-        <p className="text-sm font-medium font-sans text-[var(--ink)]">Does that look right?</p>
+        <p className="text-sm font-medium font-sans text-[var(--ink)]">{t('ai.looksRight')}</p>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <button
@@ -186,7 +147,7 @@ export const AIAnalysisCard = ({
             className="flex-1 sm:flex-initial px-3.5 py-2 bg-white border border-[var(--border-color)] text-[var(--ink)] text-sm font-medium rounded hover:bg-[var(--surface)] flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <Edit3 className="w-4 h-4" />
-            {isEditing ? 'Done Editing' : 'Edit'}
+            {isEditing ? t('ai.doneEditing') : t('ai.edit')}
           </button>
 
           <button
@@ -201,7 +162,7 @@ export const AIAnalysisCard = ({
             }
             className="flex-1 sm:flex-initial px-4 py-2 bg-[var(--ink)] text-white text-sm font-medium rounded hover:bg-black flex items-center justify-center gap-2 cursor-pointer"
           >
-            <span>Proceed to Review</span>
+            <span>{t('ai.proceedReview')}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

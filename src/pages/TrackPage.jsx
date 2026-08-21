@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, MapPin, Building2, Calendar, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Search, MapPin, Building2, Calendar, AlertCircle } from 'lucide-react';
 import { getComplaintById, sendFollowUp } from '../services/complaintService';
 import { PrioritySignal } from '../components/complaint/PrioritySignal';
 import { StatusTimeline } from '../components/complaint/StatusTimeline';
 import { FollowUp } from '../components/complaint/FollowUp';
 import { MapView } from '../components/map/MapView';
 import { LoadingState } from '../components/ui/LoadingState';
+import { useLanguage } from '../context/LanguageContext';
 
 export const TrackPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const [searchId, setSearchId] = useState(id || 'CR-1048');
   const [complaint, setComplaint] = useState(null);
@@ -36,7 +38,7 @@ export const TrackPage = () => {
       setComplaint(data);
     } catch (err) {
       console.error(err);
-      setError(`No complaint found with ID "${targetId}". Check the reference number and try again.`);
+      setError(`${t('track.notFoundDesc')} "${targetId}". ${t('track.checkRetry')}`);
       setComplaint(null);
     } finally {
       setLoading(false);
@@ -44,10 +46,9 @@ export const TrackPage = () => {
   };
 
   useEffect(() => {
-    if (id) {
-      setSearchId(id);
-      fetchComplaint(id);
-    }
+    const target = id || 'CR-1048';
+    setSearchId(target);
+    fetchComplaint(target);
   }, [id]);
 
   const handleSearchSubmit = (e) => {
@@ -63,7 +64,7 @@ export const TrackPage = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 font-sans">
       {/* Top Search Bar */}
       <div className="rounded-lg border border-[#DDE1E7] bg-white p-4 shadow-sm">
         <form onSubmit={handleSearchSubmit} className="flex items-center gap-3">
@@ -71,7 +72,7 @@ export const TrackPage = () => {
             <Search className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
             <input
               type="text"
-              placeholder="Enter Complaint Reference ID (e.g. CR-1048)"
+              placeholder={t('track.searchPlaceholder')}
               value={searchId}
               onChange={(e) => setSearchId(e.target.value)}
               className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-[#DDE1E7] rounded-lg font-mono text-[#14213D] uppercase focus-visible:ring-2 focus-visible:ring-[#E8963C]"
@@ -79,19 +80,19 @@ export const TrackPage = () => {
           </div>
           <button
             type="submit"
-            className="px-4 py-2 bg-[#14213D] text-white text-sm font-medium rounded-lg hover:bg-[#1f3057] whitespace-nowrap"
+            className="px-4 py-2 bg-[#14213D] text-white text-sm font-medium rounded-lg hover:bg-[#1f3057] whitespace-nowrap cursor-pointer"
           >
-            Track ID
+            {t('track.trackBtn')}
           </button>
         </form>
       </div>
 
       {loading ? (
-        <LoadingState message="Retrieving complaint tracking records..." />
+        <LoadingState message={t('track.loading')} />
       ) : error ? (
         <div className="rounded-lg border border-[#DDE1E7] bg-white p-8 text-center shadow-sm space-y-4">
           <AlertCircle className="w-10 h-10 text-[#E8963C] mx-auto" />
-          <h3 className="text-xl font-bold font-heading text-[#14213D]">Record Not Found</h3>
+          <h3 className="text-xl font-bold font-heading text-[#14213D]">{t('track.notFoundTitle')}</h3>
           <p className="text-sm font-sans text-gray-600 max-w-md mx-auto">{error}</p>
         </div>
       ) : complaint ? (
@@ -107,7 +108,7 @@ export const TrackPage = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#DDE1E7]">
               <div>
                 <span className="text-[11px] font-sans font-semibold text-gray-500 uppercase tracking-[0.05em] block mb-1">
-                  COMPLAINT #{complaint.id}
+                  {t('track.complaintLabel')}{complaint.id}
                 </span>
                 <h1 className="text-2xl font-bold font-heading text-[#14213D]">
                   {complaint.title}
@@ -126,7 +127,7 @@ export const TrackPage = () => {
               <div className="flex items-start gap-2.5">
                 <Building2 className="w-4 h-4 text-gray-400 mt-1" />
                 <div>
-                  <span className="text-[11px] font-sans font-semibold text-gray-500 uppercase tracking-[0.05em] block mb-1">DEPARTMENT</span>
+                  <span className="text-[11px] font-sans font-semibold text-gray-500 uppercase tracking-[0.05em] block mb-1">{t('track.departmentLabel')}</span>
                   <span className="text-sm font-semibold font-sans text-[#14213D]">
                     {complaint.department_name}
                   </span>
@@ -136,7 +137,7 @@ export const TrackPage = () => {
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-[#E8963C] mt-1 shrink-0" />
                 <div>
-                  <span className="text-[11px] font-sans font-semibold text-gray-500 uppercase tracking-[0.05em] block mb-1">LOCATION</span>
+                  <span className="text-[11px] font-sans font-semibold text-gray-500 uppercase tracking-[0.05em] block mb-1">{t('track.locationLabel')}</span>
                   <div className="text-sm font-semibold font-sans text-[#14213D]">
                     {showFullAddress ? complaint.location : formatSimpleAddress(complaint.location)}
                   </div>
@@ -144,9 +145,9 @@ export const TrackPage = () => {
                     <button
                       type="button"
                       onClick={() => setShowFullAddress(!showFullAddress)}
-                      className="text-[11px] text-[#C49A45] hover:underline font-semibold mt-1"
+                      className="text-[11px] text-[#C49A45] hover:underline font-semibold mt-1 cursor-pointer"
                     >
-                      {showFullAddress ? 'Hide full address' : 'View full address'}
+                      {showFullAddress ? t('track.hideFull') : t('track.viewFull')}
                     </button>
                   )}
                 </div>
@@ -155,7 +156,7 @@ export const TrackPage = () => {
               <div className="flex items-start gap-2.5">
                 <Calendar className="w-4 h-4 text-gray-400 mt-1" />
                 <div>
-                  <span className="text-[11px] font-sans font-semibold text-gray-500 uppercase tracking-[0.05em] block mb-1">LOGGED ON</span>
+                  <span className="text-[11px] font-sans font-semibold text-gray-500 uppercase tracking-[0.05em] block mb-1">{t('track.loggedOnLabel')}</span>
                   <span className="text-sm font-sans font-medium text-[#14213D]">
                     {new Date(complaint.created_at).toLocaleDateString('en-GB', {
                       day: '2-digit',
@@ -167,26 +168,16 @@ export const TrackPage = () => {
               </div>
             </div>
 
-            {/* Description & Image */}
+            {/* Description */}
             <div className="space-y-3 pt-4 border-t border-[#DDE1E7]">
               <div>
                 <span className="text-[11px] font-sans font-semibold text-gray-500 uppercase tracking-[0.05em] block mb-1">
-                  CITIZEN REPORT DESCRIPTION
+                  {t('track.citizenReportLabel')}
                 </span>
                 <p className="text-sm text-gray-700 font-sans leading-relaxed">
                   {complaint.description}
                 </p>
               </div>
-
-              {complaint.image_url && (
-                <div className="w-full max-w-md mx-auto h-56 rounded-lg overflow-hidden border border-[#DDE1E7] bg-[#F4F5F7] mt-3">
-                  <img
-                    src={complaint.image_url}
-                    alt={complaint.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
             </div>
           </div>
 
@@ -198,16 +189,70 @@ export const TrackPage = () => {
           {/* Follow Up Component */}
           <FollowUp complaint={complaint} onSendFollowUp={handleSendFollowUp} />
 
-          {/* Location Map Snapshot */}
-          <div className="rounded-lg border border-[#DDE1E7] bg-white p-6 shadow-sm space-y-3">
-            <h4 className="text-[11px] font-sans font-semibold text-gray-500 uppercase tracking-[0.05em] mb-1">
-              LOCATION MAP SNAPSHOT
-            </h4>
-            <MapView complaints={[complaint]} center={[complaint.coordinates.lat, complaint.coordinates.lng]} zoom={15} height="280px" />
-            <p className="text-xs text-gray-500 italic mt-2 text-center">
-              Map centered on reported issue location.
-            </p>
-          </div>
+            {/* Contact Department / Emergency Desk */}
+            <div className="rounded-lg border border-[#DDE1E7] bg-white p-6 shadow-sm space-y-4">
+              <div>
+                <h4 className="text-base font-semibold font-heading text-[#14213D] flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-[#C49A45]" />
+                  {t('track.contactDept')}
+                </h4>
+                <p className="text-xs text-gray-500 font-sans mt-0.5">
+                  {t('track.contactDesc')}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <a
+                  href="tel:1916"
+                  className="p-3 bg-[#F4F5F7] hover:bg-[#e8ebf0] border border-[#DDE1E7] rounded-lg flex items-center gap-3 transition-colors group"
+                >
+                  <div className="p-2 bg-white rounded-md text-[#14213D] group-hover:text-[#C49A45] shadow-sm">
+                    <Building2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-mono text-gray-500 uppercase block font-semibold">Toll-Free Helpline</span>
+                    <span className="text-sm font-bold text-[#14213D]">1916 / 1800-222</span>
+                  </div>
+                </a>
+
+                <a
+                  href="tel:1070"
+                  className="p-3 bg-[#F4F5F7] hover:bg-[#e8ebf0] border border-[#DDE1E7] rounded-lg flex items-center gap-3 transition-colors group"
+                >
+                  <div className="p-2 bg-white rounded-md text-[#D64545] shadow-sm">
+                    <AlertCircle className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-mono text-[#D64545] uppercase block font-semibold">Emergency Desk</span>
+                    <span className="text-sm font-bold text-[#14213D]">1070 (24x7)</span>
+                  </div>
+                </a>
+
+                <a
+                  href="mailto:support@civicreport.gov.in"
+                  className="p-3 bg-[#F4F5F7] hover:bg-[#e8ebf0] border border-[#DDE1E7] rounded-lg flex items-center gap-3 transition-colors group"
+                >
+                  <div className="p-2 bg-white rounded-md text-[#14213D] group-hover:text-[#C49A45] shadow-sm">
+                    <Search className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-mono text-gray-500 uppercase block font-semibold">Official Email</span>
+                    <span className="text-xs font-bold text-[#14213D] truncate block">support@civicreport.gov.in</span>
+                  </div>
+                </a>
+              </div>
+            </div>
+
+            {/* Location Map Snapshot */}
+            <div className="rounded-lg border border-[#DDE1E7] bg-white p-6 shadow-sm space-y-3">
+              <h4 className="text-[11px] font-sans font-semibold text-gray-500 uppercase tracking-[0.05em] mb-1">
+                {t('track.locationMapLabel')}
+              </h4>
+              <MapView complaints={[complaint]} center={[complaint.coordinates?.lat || 20.5937, complaint.coordinates?.lng || 78.9629]} zoom={14} height="280px" />
+              <p className="text-xs text-gray-500 italic mt-2 text-center">
+                {t('track.mapCentered')}
+              </p>
+            </div>
         </motion.div>
       ) : null}
     </div>

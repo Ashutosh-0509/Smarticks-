@@ -53,7 +53,7 @@ export const CivicChatbot = () => {
           botResponse = `⚠️ Could not find complaint record for ID "${id}". Please check the reference number and try again.`;
         }
       } else if (q.includes('pothole') || q.includes('report') || q.includes('how to')) {
-        botResponse = '📝 To report a pothole or civic issue:\n1. Click "Report Issue" in top menu.\n2. Add description & upload photo.\n3. Our AI model will automatically analyze priority and dispatch to the correct department!';
+        botResponse = '📝 To report a pothole or civic issue:\n1. Click "Report Issue" in top menu.\n2. Add description (or use voice in Marathi/Hindi/English) & select location on the interactive map.\n3. Our AI model will automatically analyze priority and dispatch to the correct department!';
       } else if (q.includes('helpline') || q.includes('emergency') || q.includes('contact') || q.includes('phone')) {
         botResponse = '🚨 24x7 Municipal Emergency Helplines:\n• Medical & Civic Control: 1916\n• Disaster Management: 1070\n• Water Supply Board: 1800-222-000';
       } else if (q.includes('status') || q.includes('track')) {

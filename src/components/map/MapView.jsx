@@ -27,7 +27,10 @@ const createCustomIcon = (priority) => {
   });
 };
 
-export const MapView = ({ complaints = [], center = [19.0760, 73.0033], zoom = 13, height = '480px' }) => {
+import { useLanguage } from '../../context/LanguageContext';
+
+export const MapView = ({ complaints = [], center = [20.5937, 78.9629], zoom = 5, height = '480px' }) => {
+  const { t } = useLanguage();
   const [mapMode, setMapMode] = useState('pins'); // 'pins' | 'heatmap'
 
   return (
@@ -37,27 +40,27 @@ export const MapView = ({ complaints = [], center = [19.0760, 73.0033], zoom = 1
         <button
           type="button"
           onClick={() => setMapMode('pins')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-colors font-medium ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-colors font-medium cursor-pointer ${
             mapMode === 'pins'
               ? 'bg-[#14213D] text-white font-bold'
               : 'text-gray-700 hover:bg-[#F4F5F7]'
           }`}
         >
           <MapPin className="w-3.5 h-3.5 text-[#C49A45]" />
-          <span>Pin Markers</span>
+          <span>{t('pinMarkers') || 'Pin Markers'}</span>
         </button>
 
         <button
           type="button"
           onClick={() => setMapMode('heatmap')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-colors font-medium ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-colors font-medium cursor-pointer ${
             mapMode === 'heatmap'
               ? 'bg-[#D64545] text-white font-bold'
               : 'text-gray-700 hover:bg-[#F4F5F7]'
           }`}
         >
           <Flame className="w-3.5 h-3.5 text-white" />
-          <span>Priority Heatmap</span>
+          <span>{t('priorityHeatmapBtn') || 'Priority Heatmap'}</span>
         </button>
       </div>
 
@@ -114,7 +117,7 @@ export const MapView = ({ complaints = [], center = [19.0760, 73.0033], zoom = 1
                         to={`/track/${item.id}`}
                         className="inline-block text-xs font-semibold text-[#14213D] underline hover:text-[#C49A45]"
                       >
-                        Track complaint →
+                        {t('trackComplaintLink') || 'Track complaint →'}
                       </Link>
                     </div>
                   </div>

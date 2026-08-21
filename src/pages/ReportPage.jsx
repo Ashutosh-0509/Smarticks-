@@ -3,13 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, AlertCircle, ArrowLeft, RefreshCcw, ClipboardCheck } from 'lucide-react';
 import { Input } from '../components/ui/Input';
 import { Textarea } from '../components/ui/Textarea';
-import { ImageUploader } from '../components/complaint/ImageUploader';
 import { LocationPicker } from '../components/complaint/LocationPicker';
 import { VoiceInput } from '../components/complaint/VoiceInput';
 import { AIAnalysisCard } from '../components/complaint/AIAnalysisCard';
 import { ComplaintReview } from '../components/complaint/ComplaintReview';
+import { PotholePhotoUpload } from '../components/complaint/PotholePhotoUpload';
+import { PotholeOfficerCard } from '../components/complaint/PotholeOfficerCard';
 import { Button } from '../components/ui/Button';
 import { analyzeComplaint, submitComplaint } from '../services/complaintService';
+import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
+import { UserCheck } from 'lucide-react';
 
 const PrioritySignal = ({ priority }) => {
   const isHigh = priority === 'High' || priority === 'Urgent';
@@ -24,18 +28,18 @@ const PrioritySignal = ({ priority }) => {
 
 export const ReportPage = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
+  const { user } = useAuth();
 
   // Guided steps: 'form' | 'ai_analysis' | 'review' | 'success' | 'error'
   const [step, setStep] = useState('form');
 
-  // Form state
+  // Form state (Photo evidence removed as per requirements #9 & #10)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    image_url: '',
     location: '',
     coordinates: null,
-    hasPhotoMismatch: false
   });
 
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -45,20 +49,18 @@ export const ReportPage = () => {
   const [submittedComplaint, setSubmittedComplaint] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [errors, setErrors] = useState({});
+  const [photoDataUrl, setPhotoDataUrl] = useState(null);
 
   const validateForm = () => {
     const errs = {};
-    if (!formData.title.trim()) errs.title = 'Please provide a brief title.';
+    if (!formData.title.trim()) errs.title = t('report.issueTitleLabel');
     if (!formData.description.trim()) {
-      errs.description = 'Please describe the problem in detail.';
+      errs.description = t('report.descriptionLabel');
     } else if (formData.description.trim().length < 10) {
       errs.description = 'Description should be at least 10 characters long.';
     }
-    if (!formData.image_url) {
-      errs.image_url = 'Please upload a photo of the issue.';
-    }
     if (!formData.location || !formData.coordinates) {
-      errs.location = 'Please select the location of the issue.';
+      errs.location = t('location.required');
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -72,11 +74,11 @@ export const ReportPage = () => {
     setIsAnalyzing(true);
 
     try {
-      const result = await analyzeComplaint(formData);
+      const result = await analyzeComplaint({ ...formData, photoDataUrl });
       setAiResult(result);
     } catch (err) {
       console.error(err);
-      setErrorMessage('Could not analyze complaint — please try again.');
+      setErrorMessage(t('report.errorDesc'));
       setStep('error');
     } finally {
       setIsAnalyzing(false);
@@ -94,11 +96,18 @@ export const ReportPage = () => {
       const payload = {
         ...formData,
         ...confirmedAiData,
+        image_url: photoDataUrl || formData.image_url,
+        citizen_email: user?.email,
+        citizen_name: user?.name,
         ai_summary: aiResult?.ai_summary,
         ai_reasoning: aiResult?.ai_reasoning,
         ai_confidence: aiResult?.ai_confidence,
-        evidence_score: aiResult?.evidence_score,
-        evidence_flags: aiResult?.evidence_flags
+        evidence_score: aiResult?.evidence_score || 90,
+        evidence_flags: aiResult?.evidence_flags || [],
+        pothole_severity: aiResult?.pothole_severity,
+        pothole_dimensions: aiResult?.pothole_dimensions,
+        is_safety_hazard: aiResult?.is_safety_hazard,
+        damage_type: aiResult?.damage_type
       };
 
       const result = await submitComplaint(payload);
@@ -106,7 +115,7 @@ export const ReportPage = () => {
       setStep('success');
     } catch (err) {
       console.error(err);
-      setErrorMessage("Couldn't submit — check your connection and try again.");
+      setErrorMessage(t('report.errorDesc'));
       setStep('error');
     } finally {
       setIsSubmitting(false);
@@ -117,15 +126,14 @@ export const ReportPage = () => {
     setFormData({
       title: '',
       description: '',
-      image_url: '',
       location: '',
       coordinates: null,
-      hasPhotoMismatch: false
     });
     setAiResult(null);
     setConfirmedAiData(null);
     setSubmittedComplaint(null);
     setErrors({});
+    setPhotoDataUrl(null);
     setStep('form');
   };
 
@@ -134,12 +142,18 @@ export const ReportPage = () => {
       {/* Header always visible */}
       <div className="space-y-1">
         <span className="text-xs font-mono font-bold text-[#C49A45] uppercase tracking-wider block">
-          OFFICIAL CITIZEN REPORT FORM
+          {t('report.badge')}
         </span>
-        <h1 className="text-3xl font-bold font-heading text-[#14213D]">Report an issue</h1>
+        <h1 className="text-3xl font-bold font-heading text-[#14213D]">{t('report.title')}</h1>
         <p className="text-sm text-gray-700 font-sans leading-relaxed">
-          Tell us what you noticed. Our AI Vision & NLP models will classify the issue and dispatch it to the municipal engineer.
+          {t('report.subtitle')}
         </p>
+        {user && (
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#4A9B6E]/10 border border-[#4A9B6E]/30 rounded text-xs font-medium text-[#4A9B6E] mt-2">
+            <UserCheck className="w-3.5 h-3.5" />
+            <span>Filing as verified citizen: <strong>{user.name || user.email}</strong></span>
+          </div>
+        )}
       </div>
 
       {/* UNIFIED CARD CONTAINER */}
@@ -149,8 +163,8 @@ export const ReportPage = () => {
           <form onSubmit={handleStartAnalysis} className="space-y-6 font-sans">
             <div className="space-y-6">
               <Input
-                label="ISSUE TITLE"
-                placeholder="e.g. Severe pothole near Main Market Gate"
+                label={t('report.issueTitleLabel')}
+                placeholder={t('report.titlePlaceholder')}
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 error={errors.title}
@@ -158,8 +172,8 @@ export const ReportPage = () => {
 
               <div className="flex flex-col gap-2">
                 <Textarea
-                  label="DESCRIPTION"
-                  placeholder="Example: There's a large pothole near the main gate causing vehicle swerving and commuter safety hazards."
+                  label={t('report.descriptionLabel')}
+                  placeholder={t('report.descPlaceholder')}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   maxLength={500}
@@ -171,12 +185,6 @@ export const ReportPage = () => {
                 />
               </div>
 
-              <ImageUploader
-                value={formData.image_url}
-                onChange={(url) => setFormData({ ...formData, image_url: url })}
-                error={errors.image_url}
-              />
-
               <LocationPicker
                 location={formData.location}
                 coordinates={formData.coordinates}
@@ -185,54 +193,68 @@ export const ReportPage = () => {
                 }
                 error={errors.location}
               />
+
+              {/* Pothole Photo Upload — always visible in form */}
+              <PotholePhotoUpload
+                onPhotoData={setPhotoDataUrl}
+                aiResult={null}
+              />
+
+              {/* Officer Card — shows when location is selected */}
+              {formData.location && formData.coordinates && (
+                <PotholeOfficerCard
+                  location={formData.location}
+                  coordinates={formData.coordinates}
+                  complaintTitle={formData.title}
+                  complaintDescription={formData.description}
+                />
+              )}
             </div>
 
-            <Button type="submit" variant="primary" size="lg" className="w-full font-bold bg-[#14213D]">
-              Analyze Complaint with AI
+            <Button type="submit" variant="primary" size="lg" className="w-full font-bold bg-[#14213D] cursor-pointer">
+              {t('report.analyzeBtn')}
             </Button>
           </form>
         )}
 
         {/* STEP 2: AI ANALYSIS & CONFIRMATION */}
         {step === 'ai_analysis' && (
-          <div className="space-y-4">
+          <div className="space-y-4 font-sans">
             <button
               type="button"
               onClick={() => setStep('form')}
               className="inline-flex items-center gap-1.5 text-xs font-mono text-gray-500 hover:text-[#14213D] cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              Back to edit form
+              {t('report.backToForm')}
             </button>
 
             <AIAnalysisCard
               isAnalyzing={isAnalyzing}
               aiResult={aiResult}
               onConfirm={handleAiConfirm}
-              onPhotoRetry={() => setStep('form')}
-              onContinueWithoutPhoto={() => {
-                setFormData({ ...formData, image_url: '' });
-                handleAiConfirm({
-                  category: aiResult?.category || 'Other',
-                  priority: aiResult?.priority || 'Medium',
-                  department_id: aiResult?.department_id || 'dept-general',
-                  department_name: aiResult?.department_name || 'General Services'
-                });
-              }}
             />
+
+            {/* Pothole severity details shown after analysis */}
+            {aiResult && aiResult.pothole_severity && aiResult.pothole_severity !== 'None' && (
+              <PotholePhotoUpload
+                onPhotoData={setPhotoDataUrl}
+                aiResult={aiResult}
+              />
+            )}
           </div>
         )}
 
         {/* STEP 3: FINAL REVIEW */}
         {step === 'review' && (
-          <div className="space-y-4">
+          <div className="space-y-4 font-sans">
             <button
               type="button"
               onClick={() => setStep('ai_analysis')}
               className="inline-flex items-center gap-1.5 text-xs font-mono text-gray-500 hover:text-[#14213D] cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              Back to AI classification
+              {t('report.backToAI')}
             </button>
 
             <ComplaintReview
@@ -247,7 +269,7 @@ export const ReportPage = () => {
 
         {/* STEP 4: SUCCESS SCREEN */}
         {step === 'success' && submittedComplaint && (
-          <div className="text-center space-y-6 py-4">
+          <div className="text-center space-y-6 py-4 font-sans">
             <div className="flex justify-center">
               <div className="p-3 bg-[#4A9B6E]/10 rounded-full text-[#4A9B6E]">
                 <CheckCircle2 className="w-12 h-12 stroke-[1.75]" />
@@ -256,10 +278,10 @@ export const ReportPage = () => {
 
             <div className="space-y-2">
               <h2 className="text-2xl font-bold font-heading text-[#14213D]">
-                Your complaint has been reported.
+                {t('report.successTitle')}
               </h2>
               <div className="inline-block px-3 py-1 bg-[#F4F5F7] border border-[var(--border-color)] rounded">
-                <span className="text-xs font-mono text-gray-500 uppercase mr-1">COMPLAINT ID:</span>
+                <span className="text-xs font-mono text-gray-500 uppercase mr-1">{t('report.complaintId')}</span>
                 <span className="text-base font-mono font-bold text-[#14213D]">
                   {submittedComplaint.id}
                 </span>
@@ -276,20 +298,20 @@ export const ReportPage = () => {
 
               <div className="text-xs text-gray-600 font-sans space-y-1">
                 <p>
-                  <span className="font-mono text-gray-400">DEPARTMENT:</span>{' '}
+                  <span className="font-mono text-gray-400">{t('report.department')}</span>{' '}
                   <span className="font-semibold text-[#14213D]">{submittedComplaint.department_name}</span>
                 </p>
                 <p>
-                  <span className="font-mono text-gray-400">LOCATION:</span>{' '}
+                  <span className="font-mono text-gray-400">{t('report.location')}</span>{' '}
                   <span className="font-semibold text-[#14213D]">{submittedComplaint.location}</span>
                 </p>
               </div>
 
               <div className="pt-2 border-t border-[var(--border-color)] flex items-center justify-between text-xs font-mono">
-                <span className="text-gray-500">STATUS:</span>
+                <span className="text-gray-500">{t('report.statusLabel')}</span>
                 <span className="font-bold text-[#14213D] flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-[#14213D]" />
-                  ● SUBMITTED
+                  {t('report.submittedStatus')}
                 </span>
               </div>
             </div>
@@ -298,19 +320,19 @@ export const ReportPage = () => {
               <Button
                 variant="primary"
                 onClick={() => navigate(`/track/${submittedComplaint.id}`)}
-                className="w-full sm:w-auto flex items-center justify-center gap-2"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 cursor-pointer"
               >
                 <ClipboardCheck className="w-4 h-4" />
-                <span>Track my complaint</span>
+                <span>{t('report.trackBtn')}</span>
               </Button>
 
               <Button
                 variant="secondary"
                 onClick={handleReset}
-                className="w-full sm:w-auto flex items-center justify-center gap-2"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 cursor-pointer"
               >
                 <RefreshCcw className="w-4 h-4" />
-                <span>Report another issue</span>
+                <span>{t('report.reportAnother')}</span>
               </Button>
             </div>
           </div>
@@ -318,7 +340,7 @@ export const ReportPage = () => {
 
         {/* ERROR STATE */}
         {step === 'error' && (
-          <div className="text-center space-y-6 py-4">
+          <div className="text-center space-y-6 py-4 font-sans">
             <div className="flex justify-center">
               <div className="p-3 bg-[#D64545]/10 rounded-full text-[#D64545]">
                 <AlertCircle className="w-10 h-10" />
@@ -327,19 +349,19 @@ export const ReportPage = () => {
 
             <div className="space-y-2">
               <h3 className="text-xl font-bold font-heading text-[#14213D]">
-                Submission Error
+                {t('report.errorTitle')}
               </h3>
               <p className="text-sm font-sans text-gray-700">
-                {errorMessage || "Couldn't submit — check your connection and try again."}
+                {errorMessage || t('report.errorDesc')}
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Button variant="primary" onClick={() => setStep('review')}>
-                Try again
+                {t('report.tryAgain')}
               </Button>
               <Button variant="secondary" onClick={() => setStep('form')}>
-                Go back
+                {t('report.goBack')}
               </Button>
             </div>
           </div>

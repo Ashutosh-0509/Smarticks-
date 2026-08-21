@@ -95,7 +95,7 @@ export const MOCK_COMPLAINTS = [
     department_id: 'dept-electrical',
     department_name: 'Electrical & Street Lighting',
     status: 'Submitted',
-    location: 'Oakwood Avenue, Sector 12',
+    location: 'Oakwood Avenue, Sector 12, Mumbai',
     coordinates: { lat: 19.085, lng: 73.015 },
     created_at: new Date(Date.now() - 3600000).toISOString(),
     updated_at: new Date(Date.now() - 3600000).toISOString(),
@@ -103,14 +103,52 @@ export const MOCK_COMPLAINTS = [
     ai_summary: 'Street illumination outage spanning multiple poles.',
     ai_reasoning: 'Identified as electrical grid issue rather than isolated bulb failure.',
     ai_confidence: 0.85,
-    evidence_score: 45,
-    evidence_flags: ['Night photo visibility is too low for positive verification'],
+    evidence_score: 80,
+    evidence_flags: [],
     is_duplicate: false,
     timeline: [
       {
         status: 'Submitted',
         timestamp: '18 Aug · 08:00 AM',
         note: 'Complaint logged successfully by citizen.'
+      }
+    ]
+  },
+  {
+    id: 'CR-1048',
+    title: 'Major Water Pipeline Overflow',
+    description: 'Pressurized municipal water pipe leaking and flooding the pedestrian crossing near Railway Station Road.',
+    category: 'Water Leakage',
+    priority: 'High',
+    department_id: 'dept-water',
+    department_name: 'Water Supply & Sewage',
+    status: 'In Progress',
+    location: 'Station Road, Sector 17, Vashi, Navi Mumbai',
+    coordinates: { lat: 19.0760, lng: 73.0033 },
+    created_at: new Date(Date.now() - 72000000).toISOString(),
+    updated_at: new Date(Date.now() - 36000000).toISOString(),
+    image_url: 'https://images.unsplash.com/photo-1541888946425-d0fbb186a5b3?auto=format&fit=crop&q=80&w=800',
+    ai_summary: 'Pressurized water leakage wasting potable supply.',
+    ai_reasoning: 'High priority due to active water waste and road degradation hazard.',
+    ai_confidence: 0.96,
+    evidence_score: 95,
+    evidence_flags: [],
+    is_duplicate: false,
+    timeline: [
+      {
+        status: 'Submitted',
+        timestamp: '19 Aug · 09:00 AM',
+        note: 'Complaint logged successfully by citizen.'
+      },
+      {
+        status: 'Acknowledged',
+        timestamp: '19 Aug · 11:30 AM',
+        note: 'Complaint acknowledged by Water Department dispatch desk.'
+      },
+      {
+        status: 'In Progress',
+        timestamp: '19 Aug · 03:15 PM',
+        note: 'Maintenance crew dispatched to fix pipeline leak.'
       }
     ]
   }

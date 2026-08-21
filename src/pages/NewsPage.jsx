@@ -1,8 +1,11 @@
 import React from 'react';
 import { Newspaper } from 'lucide-react';
 import { CivicNewsFeed } from '../components/dashboard/CivicNewsFeed';
+import { useLanguage } from '../context/LanguageContext';
 
 export const NewsPage = () => {
+  const { t } = useLanguage();
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 w-full animate-in fade-in duration-500 font-sans">
       <div className="mb-8">
@@ -11,13 +14,16 @@ export const NewsPage = () => {
             <Newspaper className="w-6 h-6 text-[#C49A45]" />
           </div>
           <div>
+            <span className="text-xs font-mono font-bold text-[#C49A45] uppercase tracking-wider block">
+              {t('news.badge')}
+            </span>
             <h1 className="text-3xl font-bold font-heading text-[#14213D] tracking-tight">
-              Live Civic Updates
+              {t('news.title')}
             </h1>
           </div>
         </div>
         <p className="text-gray-600 max-w-3xl ml-14">
-          Real-time incident reports, emergency alerts, and infrastructure updates for the Mumbai Region. Powered by live news feeds.
+          {t('news.subtitle')}
         </p>
       </div>
 
@@ -28,3 +34,4 @@ export const NewsPage = () => {
     </div>
   );
 };
+

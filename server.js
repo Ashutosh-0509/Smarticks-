@@ -231,6 +231,10 @@ app.post('/api/analyze', async (req, res) => {
   try {
     const { title, description, image_url } = req.body;
 
+    // Detect if this is a pothole-related complaint for enhanced analysis
+    const combinedText = `${title || ''} ${description || ''}`.toLowerCase();
+    const isPotholeRelated = ['pothole', 'road damage', 'crater', 'asphalt', 'road surface', 'broken road', 'road hole', 'khadda', 'rut', 'depression'].some(kw => combinedText.includes(kw));
+
     const responseSchema = {
       type: Type.OBJECT,
       properties: {
@@ -243,15 +247,22 @@ app.post('/api/analyze', async (req, res) => {
         ai_confidence: { type: Type.NUMBER },
         evidence_score: { type: Type.NUMBER },
         evidence_flags: { type: Type.ARRAY, items: { type: Type.STRING } },
-        is_duplicate: { type: Type.BOOLEAN }
+        is_duplicate: { type: Type.BOOLEAN },
+        // Pothole-specific fields (returned for all, populated when relevant)
+        pothole_severity: { type: Type.STRING },
+        pothole_dimensions: { type: Type.STRING },
+        is_safety_hazard: { type: Type.BOOLEAN },
+        damage_type: { type: Type.STRING }
       },
       required: [
         "category", "priority", "department_id", "department_name", 
         "ai_summary", "ai_reasoning", "ai_confidence", 
-        "evidence_score", "evidence_flags", "is_duplicate"
+        "evidence_score", "evidence_flags", "is_duplicate",
+        "pothole_severity", "pothole_dimensions", "is_safety_hazard", "damage_type"
       ]
     };
 
+    // Build prompt — enhanced with pothole-reporter vision logic when relevant
     let prompt = `Analyze the following civic complaint and categorize it appropriately.
 Title: ${title}
 Description: ${description}
@@ -267,6 +278,28 @@ Instructions:
 - evidence_score is an integer from 0 to 100 based on the quality of the report and image (if provided)
 - evidence_flags is an array of strings noting any issues with the evidence (e.g., "Missing photo", "Vague description"). If good, leave empty.
 - is_duplicate should be false.`;
+
+    // Enhanced pothole-specific prompt inspired by pothole-reporter app
+    if (isPotholeRelated || (image_url && image_url.startsWith('data:image/'))) {
+      prompt += `
+
+POTHOLE / ROAD DAMAGE ANALYSIS (adapted from pothole-reporter):
+If this complaint involves road damage, also analyze:
+- pothole_severity: Must be one of "Minor" (< 5cm deep, cosmetic surface wear), "Moderate" (5-10cm deep, vehicle hazard), "Severe" (> 10cm deep or > 30cm wide, immediate danger), or "None" if not a road damage issue.
+- pothole_dimensions: Estimate dimensions from the photo if available (e.g., "Approx. 25cm wide × 8cm deep"), or "Not visible" if no photo.
+- is_safety_hazard: true if the damage could cause vehicle damage, pedestrian injury, or forces traffic to swerve.
+- damage_type: Classify the road damage type. Must be one of: "Pothole Cavity", "Failed Patch", "Surface Breakup", "Rut/Depression", "Edge Break", "Crocodile Cracking", "None".
+
+If the issue is NOT road damage related, set pothole_severity to "None", pothole_dimensions to "N/A", is_safety_hazard to false, and damage_type to "None".`;
+    } else {
+      prompt += `
+
+For the pothole-specific fields:
+- pothole_severity: Set to "None" since this is not a road damage complaint.
+- pothole_dimensions: Set to "N/A".
+- is_safety_hazard: Set to false.
+- damage_type: Set to "None".`;
+    }
 
     let contents = [prompt];
 
@@ -301,6 +334,99 @@ Instructions:
   } catch (error) {
     console.error("Gemini API Error:", error);
     res.status(500).json({ error: "Failed to analyze complaint with AI" });
+  }
+});
+
+// =========================================================
+// Pothole Officer Lookup Endpoint
+// Searches the ward_officers table by location keywords
+// =========================================================
+app.post('/api/pothole/officer', async (req, res) => {
+  try {
+    const { location, coordinates } = req.body;
+
+    if (!location) {
+      return res.status(400).json({ error: "Location is required" });
+    }
+
+    const locationLower = location.toLowerCase();
+
+    // Fetch all ward officers from Supabase
+    const { data: officers, error: dbError } = await supabase
+      .from('ward_officers')
+      .select('*');
+
+    if (dbError) {
+      console.error("Ward officers DB error:", dbError);
+      return res.status(500).json({ error: "Failed to query officer database" });
+    }
+
+    if (!officers || officers.length === 0) {
+      return res.json({
+        found: false,
+        message: "No officer records found in database. Please run setup-pothole-officers.sql in your Supabase SQL Editor."
+      });
+    }
+
+    // Score each ward by how many location keywords match the user's location string
+    let bestMatch = null;
+    let bestScore = 0;
+
+    for (const officer of officers) {
+      if (officer.ward_no === 'GEN') continue; // skip generic fallback for now
+
+      const keywords = officer.location_keywords || [];
+      let score = 0;
+
+      for (const keyword of keywords) {
+        if (locationLower.includes(keyword.toLowerCase())) {
+          // Longer keyword matches are more specific and score higher
+          score += keyword.length;
+        }
+      }
+
+      // Also check ward_name and city
+      if (locationLower.includes(officer.ward_name.toLowerCase())) {
+        score += officer.ward_name.length;
+      }
+      if (locationLower.includes(officer.city.toLowerCase())) {
+        score += 2;
+      }
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = officer;
+      }
+    }
+
+    // If no specific match found, use the generic fallback
+    if (!bestMatch) {
+      bestMatch = officers.find(o => o.ward_no === 'GEN') || null;
+    }
+
+    if (!bestMatch) {
+      return res.json({
+        found: false,
+        message: "Could not determine the responsible ward for this location."
+      });
+    }
+
+    res.json({
+      found: true,
+      ward_no: bestMatch.ward_no,
+      ward_name: bestMatch.ward_name,
+      city: bestMatch.city,
+      officer_name: bestMatch.officer_name,
+      officer_designation: bestMatch.officer_designation,
+      officer_email: bestMatch.officer_email,
+      officer_phone: bestMatch.officer_phone,
+      officer_department: bestMatch.officer_department,
+      contractor_name: bestMatch.contractor_name,
+      contractor_contact: bestMatch.contractor_contact
+    });
+  } catch (error) {
+    console.error("Officer lookup error:", error);
+    res.status(500).json({ error: "Failed to look up responsible officer" });
   }
 });
 

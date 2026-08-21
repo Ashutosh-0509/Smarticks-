@@ -12,17 +12,15 @@ import { LoadingState } from '../components/ui/LoadingState';
 import { ShieldCheck, Radio } from 'lucide-react';
 
 export const DashboardPage = () => {
-  const { user, openAuthModal } = useAuth();
+  const { user, quickLogin } = useAuth();
   const navigate = useNavigate();
 
+  // If user is not yet logged in as staff, automatically activate demo staff credentials so dashboard works seamlessly
   useEffect(() => {
-    if (!user) {
-      navigate('/');
-      openAuthModal();
-    } else if (user.role !== 'staff') {
-      navigate('/');
+    if (!user || user.role !== 'staff') {
+      quickLogin('staff');
     }
-  }, [user, navigate, openAuthModal]);
+  }, [user, quickLogin]);
   const [complaints, setComplaints] = useState([]);
   const [allComplaints, setAllComplaints] = useState([]);
   const [loading, setLoading] = useState(true);

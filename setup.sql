@@ -1,8 +1,4 @@
--- Run this in your Supabase SQL Editor
-
-CREATE TABLE IF NOT EXISTS otp_codes (
-  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  email text NOT NULL,
+x 
   code_hash text NOT NULL,
   expires_at timestamptz NOT NULL,
   consumed boolean DEFAULT false,

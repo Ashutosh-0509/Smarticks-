@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Mic, MicOff } from 'lucide-react';
+import { Mic } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const VoiceInput = ({ onTranscript, currentValue }) => {
+  const { t, speechLocale } = useLanguage();
   const [isRecording, setIsRecording] = useState(false);
   const [isSupported, setIsSupported] = useState(true);
   const recognitionRef = useRef(null);
@@ -16,30 +18,7 @@ export const VoiceInput = ({ onTranscript, currentValue }) => {
     const recognition = new SpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang = 'en-US';
-
-    recognition.onresult = (event) => {
-      let finalTranscript = '';
-      let interimTranscript = '';
-
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
-        } else {
-          interimTranscript += event.results[i][0].transcript;
-        }
-      }
-
-      // If there's a final transcript, append it. If interim, show it (temporarily replacing).
-      // A common pattern is just combining the currentValue with the new final text.
-      // For simplicity, we just pass back the final+interim if we want live typing, 
-      // but it's tricky to mix typing and speaking. 
-      // Instead, we just pass the new chunk back and let the parent append or replace.
-      
-      // Let's just do a simple replacement for the demo: 
-      // the voice session fully replaces or appends to the text.
-      // Actually, standard behavior: append to existing text.
-    };
+    recognition.lang = speechLocale;
 
     recognition.onerror = (event) => {
       console.error("Speech recognition error", event.error);
@@ -57,7 +36,7 @@ export const VoiceInput = ({ onTranscript, currentValue }) => {
         recognitionRef.current.stop();
       }
     };
-  }, []);
+  }, [speechLocale]);
 
   const toggleRecording = () => {
     if (!isSupported) {
@@ -66,24 +45,28 @@ export const VoiceInput = ({ onTranscript, currentValue }) => {
     }
 
     if (isRecording) {
-      recognitionRef.current.stop();
+      if (recognitionRef.current) recognitionRef.current.stop();
       setIsRecording(false);
     } else {
-      // Start fresh or append? Let's just listen and append.
-      // To properly append without losing interim results, we can keep track of what the text was BEFORE we started recording.
-      const startText = currentValue ? currentValue + (currentValue.endsWith(' ') ? '' : ' ') : '';
-      
-      recognitionRef.current.onresult = (event) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          transcript += event.results[i][0].transcript;
-        }
-        // Send the combined text back to the parent
-        onTranscript(startText + transcript);
-      };
+      if (recognitionRef.current) {
+        recognitionRef.current.lang = speechLocale;
+        const startText = currentValue ? currentValue + (currentValue.endsWith(' ') ? '' : ' ') : '';
+        
+        recognitionRef.current.onresult = (event) => {
+          let transcript = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            transcript += event.results[i][0].transcript;
+          }
+          onTranscript(startText + transcript);
+        };
 
-      recognitionRef.current.start();
-      setIsRecording(true);
+        try {
+          recognitionRef.current.start();
+          setIsRecording(true);
+        } catch (e) {
+          console.error(e);
+        }
+      }
     }
   };
 
@@ -94,23 +77,23 @@ export const VoiceInput = ({ onTranscript, currentValue }) => {
       <button
         type="button"
         onClick={toggleRecording}
-        className={`flex items-center justify-center p-1.5 rounded-full transition-colors border ${
+        className={`flex items-center justify-center p-1.5 rounded-full transition-colors border cursor-pointer ${
           isRecording 
             ? 'bg-[#D64545]/10 border-[#D64545] text-[#D64545]' 
             : 'bg-[#F4F5F7] border-[#DDE1E7] text-[#14213D] hover:bg-[#e8ebf0]'
         }`}
         title="Voice Input"
       >
-        {isRecording ? <Mic className="w-4 h-4 animate-pulse" /> : <Mic className="w-4 h-4" />}
+        <Mic className={`w-4 h-4 ${isRecording ? 'animate-pulse' : ''}`} />
       </button>
       <span className="text-[10px] sm:text-xs text-gray-500 font-sans italic">
         {isRecording ? (
           <span className="flex items-center gap-1 text-[#D64545] font-medium">
             <span className="w-1.5 h-1.5 rounded-full bg-[#D64545] animate-ping"></span>
-            Listening... (Tap to stop)
+            {t('voice.listening')}
           </span>
         ) : (
-          'Tap to speak instead of typing'
+          t('voice.tapToSpeak')
         )}
       </span>
     </div>

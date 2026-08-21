@@ -167,6 +167,32 @@ export const AuthModal = () => {
                     <span className="text-xs text-gray-500 mt-1">Official dispatch center</span>
                   </button>
                 </div>
+
+                {/* Instant 1-Click Demo Login */}
+                <div className="pt-3 border-t border-[var(--border-color)] space-y-2">
+                  <span className="text-[11px] font-mono font-semibold text-gray-500 uppercase block text-center">
+                    ⚡ Quick Instant Demo Login
+                  </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => quickLogin('citizen')}
+                      className="px-3 py-2 bg-[#14213D] hover:bg-[#1f3057] text-white text-xs font-semibold rounded cursor-pointer transition-colors text-center"
+                    >
+                      Demo Citizen
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        quickLogin('staff');
+                        window.location.href = '/dashboard';
+                      }}
+                      className="px-3 py-2 bg-[#C49A45] hover:bg-[#a88235] text-white text-xs font-semibold rounded cursor-pointer transition-colors text-center"
+                    >
+                      Demo Officer (Staff)
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 
